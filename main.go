@@ -20,7 +20,7 @@ var prog string
 
 func validator(name string, s *ast.StructType) {
 	fmt.Println(name)
-	for _, fld := range(s.Fields.List) {
+	for _, fld := range s.Fields.List {
 		nam := fld.Names[0].Name
 		typ := fld.Type.(*ast.Ident)
 		fmt.Printf("%s %s\n", nam, typ)
@@ -65,11 +65,17 @@ func parse(filename string) error {
 	// Isolate the struct types--the things for which we want to
 	// generate validator functions.
 	for _, obj := range astfile.Scope.Objects {
-		if obj.Kind != ast.Typ { continue }
+		if obj.Kind != ast.Typ {
+			continue
+		}
 		ts, ok := obj.Decl.(*ast.TypeSpec)
-		if !ok { continue }
+		if !ok {
+			continue
+		}
 		s, ok := ts.Type.(*ast.StructType)
-		if !ok { continue }
+		if !ok {
+			continue
+		}
 		if s.Fields == nil {
 			return fmt.Errorf("type %s struct has empty field list %v", ts.Name, ts)
 		}
