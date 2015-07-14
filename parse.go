@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"path"
 
 	"go/ast"
 	"go/parser"
@@ -22,14 +21,8 @@ func validator(name string, s *ast.StructType) {
 func main() {
 	log.SetFlags(0)
 
-	if len(os.Args) != 2 {
-		log.Printf("usage: %s file.v", path.Base(os.Args[0]))
-		os.Exit(2)
-	}
-
-	path := os.Args[1]
 	fs := token.NewFileSet()
-	f, err := parser.ParseFile(fs, path, nil, 0)
+	f, err := parser.ParseFile(fs, "-", os.Stdin, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
