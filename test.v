@@ -22,5 +22,8 @@ type fooTypeSet struct {
 type blahTypeSet struct {
 	r rune // well-defined?
 	by byte // well-defined?
+}
 
+type PublicStruct struct {
+	x int
 }

@@ -9,22 +9,38 @@ import (
 	"os"
 	"path"
 	"strings"
+	"unicode"
+
 
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"unicode/utf8"
 )
 
 // Program name.  Set by init.
 var prog string
 
 func validator(name string, s *ast.StructType) {
-	fmt.Println(name)
+	first, _ := utf8.DecodeRune([]byte(name))
+	isPublic := unicode.IsUpper(first)
+	var fname string
+	if isPublic {
+		fname = fmt.Sprintf("Validate%s", name)
+	} else {
+		fname = fmt.Sprintf("validate%s", strings.Title(name))
+	}
+
+	fmt.Printf("func %s(data map[string]string) *%s {\n", fname, name)
+
 	for _, fld := range s.Fields.List {
 		nam := fld.Names[0].Name
 		typ := fld.Type.(*ast.Ident)
-		fmt.Printf("%s %s\n", nam, typ)
+		fmt.Printf("\t// %s %s\n", nam, typ)
 	}
+
+	fmt.Print("\treturn nil\n")
+	fmt.Print("}\n")
 }
 
 func parse(filename string) error {
