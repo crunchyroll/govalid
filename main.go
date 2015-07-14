@@ -24,8 +24,7 @@ func validator(name string, s *ast.StructType) {
 func main() {
 	log.SetFlags(0)
 
-	fs := token.NewFileSet()
-	f, err := parser.ParseFile(fs, "-", os.Stdin, 0)
+	f, err := parser.ParseFile(token.NewFileSet(), "-", os.Stdin, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
