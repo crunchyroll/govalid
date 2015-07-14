@@ -12,6 +12,9 @@ import (
 	"go/token"
 )
 
+// Program name.  Set by init.
+var prog string
+
 func validator(name string, s *ast.StructType) {
 	fmt.Println(name)
 	for _, fld := range(s.Fields.List) {
@@ -39,5 +42,30 @@ func main() {
 			log.Fatalf("type %s struct has empty field list %v", ts.Name, ts)
 		}
 		validator(ts.Name.Name, s)
+	}
+
+func usage() {
+	log.Printf("usage: %s file.v", path.Base(os.Args[0]))
+	os.Exit(2)
+}
+
+func init() {
+	log.SetFlags(0)
+	prog = path.Base(os.Args[0])
+}
+
+func main() {
+	if len(os.Args) != 2 {
+		usage()
+	}
+
+	filename := os.Args[1]
+	if filename == "" {
+		usage()
+	}
+
+	err := parse(filename)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
