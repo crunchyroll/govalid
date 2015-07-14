@@ -21,6 +21,10 @@ import (
 // Program name.  Set by init.
 var prog string
 
+func validateString(fldname string) {
+	fmt.Printf("\tret.%s = data[\"%s\"]\n", fldname, fldname)
+}
+
 func validator(name string, s *ast.StructType) {
 	first, _ := utf8.DecodeRune([]byte(name))
 	isPublic := unicode.IsUpper(first)
@@ -31,15 +35,23 @@ func validator(name string, s *ast.StructType) {
 		fname = fmt.Sprintf("validate%s", strings.Title(name))
 	}
 
-	fmt.Printf("func %s(data map[string]string) *%s {\n", fname, name)
+	fmt.Printf("func %s(data map[string]string) (*%s, error) {\n", fname, name)
+	fmt.Printf("\tret := new(%s)\n", name)
 
 	for _, fld := range s.Fields.List {
 		nam := fld.Names[0].Name
-		typ := fld.Type.(*ast.Ident)
+		typ, ok := fld.Type.(*ast.Ident)
+		if !ok {
+			continue
+		}
+		switch typ.Name {
+		case "string":
+			validateString(nam)
+		}
 		fmt.Printf("\t// %s %s\n", nam, typ)
 	}
 
-	fmt.Print("\treturn nil\n")
+	fmt.Print("\treturn ret, nil\n")
 	fmt.Print("}\n")
 }
 
