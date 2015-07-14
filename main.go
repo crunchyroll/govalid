@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"fmt"
 
 	"go/ast"
 	"go/parser"
@@ -10,11 +11,11 @@ import (
 )
 
 func validator(name string, s *ast.StructType) {
-	log.Print(name)
+	fmt.Println(name)
 	for _, fld := range(s.Fields.List) {
 		nam := fld.Names[0].Name
 		typ := fld.Type.(*ast.Ident)
-		log.Printf("%s %s", nam, typ)
+		fmt.Printf("%s %s\n", nam, typ)
 	}
 }
 
