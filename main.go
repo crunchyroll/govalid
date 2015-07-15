@@ -52,6 +52,7 @@ func validator(b *buf, name string, s *ast.StructType) {
 		if !ok {
 			continue
 		}
+		b.writef("\t// %s %s\n", nam, typ)
 		switch typ.Name {
 		case "string":
 			validateString(b, nam)
@@ -59,9 +60,9 @@ func validator(b *buf, name string, s *ast.StructType) {
 			validateBool(b, nam)
 			b.needsStrconv = true
 		}
-		b.writef("\t// %s %s\n", nam, typ)
 	}
 
+	b.writef("\t\n")
 	b.writef("\treturn ret, nil\n")
 	b.writef("}\n")
 }
