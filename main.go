@@ -69,7 +69,12 @@ func process(filename string, file *os.File) error {
 
 	// Add strconv import if needed.
 	if b.needsStrconv {
-		prependImport(astfile, "strconv")
+		// Make more generic if need be.  (E.g., adding other
+		// imports besides strconv, doing non-linear search
+		// through existing imports, etc.)
+		if !hasImport(astfile, "strconv") {
+			prependImport(astfile, "strconv")
+		}
 	}
 
 	// Output header comment.
