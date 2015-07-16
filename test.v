@@ -3,9 +3,15 @@ package foo
 // Test import here to see what happens if the generated code needs more
 // imports.
 import "log"
+import (
+	"fmt"
+	"strings"
+)
 
 func init() {
 	log.Println("log use")
+	fmt.Println("fmt use")
+	fmt.Println(strings.ToUpper("strings use"))
 }
 
 type fooTypeSet struct {
