@@ -18,7 +18,7 @@ func findImports(astfile *ast.File) []string {
 			continue
 		}
 		// Cut off leading and trailing double quote characters.
-		v := is.Path.Value[1:len(is.Path.Value)-1]
+		v := is.Path.Value[1 : len(is.Path.Value)-1]
 		r = append(r, v)
 	}
 	return r
