@@ -11,11 +11,10 @@ import (
 	"strings"
 	"unicode"
 
-
 	"go/ast"
 	"go/parser"
-	"go/token"
 	"go/printer"
+	"go/token"
 	"unicode/utf8"
 )
 
@@ -74,28 +73,28 @@ func prependImport(astfile *ast.File, name string) {
 	litvalue := fmt.Sprintf("\"%s\"", name)
 
 	decl := &ast.GenDecl{
-		Doc: &ast.CommentGroup {
+		Doc: &ast.CommentGroup{
 			List: []*ast.Comment{
 				&ast.Comment{
 					Slash: nopos,
-					Text: comment,
+					Text:  comment,
 				},
 			},
 		},
 		TokPos: nopos,
-		Tok: token.IMPORT,
+		Tok:    token.IMPORT,
 		Lparen: nopos,
 		Specs: []ast.Spec{
 			&ast.ImportSpec{
-				Doc: nil,
+				Doc:  nil,
 				Name: nil,
 				Path: &ast.BasicLit{
 					ValuePos: nopos,
-					Kind: token.STRING,
-					Value: litvalue,
+					Kind:     token.STRING,
+					Value:    litvalue,
 				},
 				Comment: nil,
-				EndPos: nopos,
+				EndPos:  nopos,
 			},
 		},
 		Rparen: nopos,
