@@ -9,100 +9,20 @@ import (
 	"os"
 	"path"
 	"strings"
-	"unicode"
 
 	"go/ast"
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"unicode/utf8"
 )
 
 // Program name variables.  Set by init.
 var prog string
 var progUpper string
 
-func validateString(b *buf, fldname string) {
-	b.writef("\tret.%s = data[\"%s\"]\n", fldname, fldname)
-}
-
-func validateBool(b *buf, fldname string) {
-	b.writef("\tret.%s, err = strconv.ParseBool(data[\"%s\"])\n", fldname, fldname)
-	b.writef("\tif err != nil {\n")
-	b.writef("\t\treturn nil, err\n")
-	b.writef("\t}\n")
-}
-
-func validator(b *buf, name string, s *ast.StructType) {
-	first, _ := utf8.DecodeRune([]byte(name))
-	isPublic := unicode.IsUpper(first)
-	var fname string
-	if isPublic {
-		fname = fmt.Sprintf("Validate%s", name)
-	} else {
-		fname = fmt.Sprintf("validate%s", strings.Title(name))
-	}
-
-	b.writef("func %s(data map[string]string) (*%s, error) {\n", fname, name)
-	b.writef("\tret := new(%s)\n", name)
-
-	for _, fld := range s.Fields.List {
-		nam := fld.Names[0].Name
-		typ, ok := fld.Type.(*ast.Ident)
-		if !ok {
-			continue
-		}
-		b.writef("\t// %s %s\n", nam, typ)
-		switch typ.Name {
-		case "string":
-			validateString(b, nam)
-		case "bool":
-			validateBool(b, nam)
-			b.needsStrconv = true
-		}
-	}
-
-	b.writef("\t\n")
-	b.writef("\treturn ret, nil\n")
-	b.writef("}\n")
-}
-
-func prependImport(astfile *ast.File, name string) {
-	nopos := token.Pos(0)
-	comment := fmt.Sprintf("// *** %s IMPORT ADDED BY %s ***", name, progUpper)
-	litvalue := fmt.Sprintf("\"%s\"", name)
-
-	decl := &ast.GenDecl{
-		Doc: &ast.CommentGroup{
-			List: []*ast.Comment{
-				&ast.Comment{
-					Slash: nopos,
-					Text:  comment,
-				},
-			},
-		},
-		TokPos: nopos,
-		Tok:    token.IMPORT,
-		Lparen: nopos,
-		Specs: []ast.Spec{
-			&ast.ImportSpec{
-				Doc:  nil,
-				Name: nil,
-				Path: &ast.BasicLit{
-					ValuePos: nopos,
-					Kind:     token.STRING,
-					Value:    litvalue,
-				},
-				Comment: nil,
-				EndPos:  nopos,
-			},
-		},
-		Rparen: nopos,
-	}
-
-	astfile.Decls = append([]ast.Decl{decl}, astfile.Decls...)
-}
-
+// process parses the input file, finds struct definitions, and invokes
+// the validator code to produce validators for the struct definitions.
+// It prints the original code plus the generated code to standard out.
 func process(filename string, file *os.File) error {
 	dst := os.Stdout // Destination.
 
