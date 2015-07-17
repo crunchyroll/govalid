@@ -67,14 +67,11 @@ func process(filename string, file *os.File) error {
 		validator(b, ts.Name.Name, s)
 	}
 
-	// Add strconv import if needed.
-	if b.needsStrconv {
-		// Make more generic if need be.  (E.g., adding other
-		// imports besides strconv, doing non-linear search
-		// through existing imports, etc.)
-		if !hasImport(astfile, "strconv") {
-			prependImport(astfile, "strconv")
-		}
+	// Add strconv import if needed.  Also, make more generic if
+	// need be.  (E.g., adding other imports besides strconv, doing
+	// non-linear search through existing imports, etc.)
+	if b.needsStrconv && !hasImport(astfile, "strconv") {
+		prependImport(astfile, "strconv")
 	}
 
 	// Output header comment.
