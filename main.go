@@ -92,6 +92,7 @@ func process(filename string, file *os.File) error {
 		return err
 	}
 
+	// Output generated code (from the buf).
 	io.Copy(dst, b)
 
 	return nil
