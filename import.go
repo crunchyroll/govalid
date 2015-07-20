@@ -38,36 +38,36 @@ func hasImport(astfile *ast.File, name string) bool {
 // prependImport prepends,in place, an import of the given name to the
 // list of imports in the *ast.File.
 func prependImport(astfile *ast.File, name string) {
-	nopos := token.Pos(0)
-	comment := fmt.Sprintf("// *** %s IMPORT ADDED BY %s ***", name, progUpper)
 	litvalue := fmt.Sprintf("\"%s\"", name)
-
-	decl := &ast.GenDecl{
-		Doc: &ast.CommentGroup{
-			List: []*ast.Comment{
-				&ast.Comment{
-					Slash: nopos,
-					Text:  comment,
-				},
+	commentText := fmt.Sprintf("// *** %s IMPORT ADDED BY %s ***", name, progUpper)
+	comment := &ast.CommentGroup{
+		List: []*ast.Comment{
+			&ast.Comment{
+				Slash: token.NoPos,
+				Text:  commentText,
 			},
 		},
-		TokPos: nopos,
+	}
+
+	decl := &ast.GenDecl{
+		Doc:    comment,
+		TokPos: token.NoPos,
 		Tok:    token.IMPORT,
-		Lparen: nopos,
+		Lparen: token.NoPos,
 		Specs: []ast.Spec{
 			&ast.ImportSpec{
 				Doc:  nil,
 				Name: nil,
 				Path: &ast.BasicLit{
-					ValuePos: nopos,
+					ValuePos: token.NoPos,
 					Kind:     token.STRING,
 					Value:    litvalue,
 				},
 				Comment: nil,
-				EndPos:  nopos,
+				EndPos:  token.NoPos,
 			},
 		},
-		Rparen: nopos,
+		Rparen: token.NoPos,
 	}
 
 	astfile.Decls = append([]ast.Decl{decl}, astfile.Decls...)

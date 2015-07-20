@@ -8,6 +8,7 @@ TODO
 
 Future Work
 -----------
+ - Include comments from original source `.v`.
  - Add more types to validate beyond strconv "low-hanging fruit".
  - Handle weirder pre-existing imports in `.v` files, such as strconv
    imported as some other name.
