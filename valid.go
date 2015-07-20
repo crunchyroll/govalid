@@ -24,6 +24,9 @@ func validateBool(b *buf, fldname string) {
 	b.writef("\t}\n")
 }
 
+// It would be nice if we didn't have so much duplication of generated
+// code between the numeric validators.
+
 // validateUint writes validator code for a uint of the given bitSize to
 // the given *buf.
 func validateUint(b *buf, fldname string, bitSize int) {
