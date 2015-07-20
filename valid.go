@@ -24,6 +24,16 @@ func validateBool(b *buf, fldname string) {
 	b.writef("\t}\n")
 }
 
+func validateUint(b *buf, fldname string, bitSize int) {
+	b.writef("\t%sTmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	b.writef("\tif err != nil {\n")
+	b.writef("\t\treturn nil, err\n")
+	b.writef("\t}\n")
+	// Have to cast since ParseUint returns a uint64.  Superfluous
+	// if bitSize is 64, but whatever.
+	b.writef("\tret.%s = uint%d(%sTmp)\n", fldname, bitSize, fldname)
+}
+
 // validator writes validator code for the given struct to the given
 // *buf.  It iterates through the struct fields, and for those for which
 // it can generate validator code, it does so.
@@ -55,6 +65,15 @@ func validator(b *buf, name string, s *ast.StructType) {
 		case "bool":
 			validateBool(b, nam)
 			b.needsStrconv = true
+
+		case "uint8":
+			validateUint(b, nam, 8)
+		case "uint16":
+			validateUint(b, nam, 16)
+		case "uint32":
+			validateUint(b, nam, 32)
+		case "uint64":
+			validateUint(b, nam, 64)
 		}
 	}
 
