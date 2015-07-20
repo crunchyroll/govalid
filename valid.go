@@ -36,6 +36,15 @@ func validateUint(b *buf, fldname string, bitSize int) {
 	b.writef("\tret.%s = uint%d(%sTmp)\n", fldname, bitSize, fldname)
 }
 
+// validateUint writes validator code for a uint of
+// implementation-specific size to the given *buf.
+func validateUintBare(b *buf, fldname string) {
+	b.writef("\tret.%s, err = strconv.ParseUint(data[\"%s\"], 0, 0)\n", fldname, fldname)
+	b.writef("\tif err != nil {\n")
+	b.writef("\t\treturn nil, err\n")
+	b.writef("\t}\n")
+}
+
 // validateInt writes validator code for an int of the given bitSize to
 // the given *buf.
 func validateInt(b *buf, fldname string, bitSize int) {
@@ -46,6 +55,15 @@ func validateInt(b *buf, fldname string, bitSize int) {
 	// Have to cast since ParseInt returns an int64.  Superfluous
 	// if bitSize is 64, but whatever.
 	b.writef("\tret.%s = int%d(%sTmp)\n", fldname, bitSize, fldname)
+}
+
+// validateInt writes validator code for an int of
+// implementation-specific size to the given *buf.
+func validateIntBare(b *buf, fldname string) {
+	b.writef("\tret.%s, err = strconv.ParseInt(data[\"%s\"], 0, 0)\n", fldname, fldname)
+	b.writef("\tif err != nil {\n")
+	b.writef("\t\treturn nil, err\n")
+	b.writef("\t}\n")
 }
 
 // validateFloat writes validator code for a float of the given bitSize to
@@ -92,6 +110,8 @@ func validator(b *buf, name string, s *ast.StructType) {
 			validateBool(b, nam)
 			b.needsStrconv = true
 
+		case "uint":
+			validateUintBare(b, nam)
 		case "uint8":
 			validateUint(b, nam, 8)
 		case "uint16":
@@ -101,6 +121,8 @@ func validator(b *buf, name string, s *ast.StructType) {
 		case "uint64":
 			validateUint(b, nam, 64)
 
+		case "int":
+			validateIntBare(b, nam)
 		case "int8":
 			validateInt(b, nam, 8)
 		case "int16":
