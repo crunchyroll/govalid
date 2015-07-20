@@ -48,6 +48,18 @@ func validateInt(b *buf, fldname string, bitSize int) {
 	b.writef("\tret.%s = int%d(%sTmp)\n", fldname, bitSize, fldname)
 }
 
+// validateFloat writes validator code for a float of the given bitSize to
+// the given *buf.
+func validateFloat(b *buf, fldname string, bitSize int) {
+	b.writef("\t%sTmp, err = strconv.ParseFloat(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	b.writef("\tif err != nil {\n")
+	b.writef("\t\treturn nil, err\n")
+	b.writef("\t}\n")
+	// Have to cast since ParseFloat returns a float64.  Superfluous
+	// if bitSize is 64, but whatever.
+	b.writef("\tret.%s = float%d(%sTmp)\n", fldname, bitSize, fldname)
+}
+
 // validator writes validator code for the given struct to the given
 // *buf.  It iterates through the struct fields, and for those for which
 // it can generate validator code, it does so.
@@ -97,6 +109,11 @@ func validator(b *buf, name string, s *ast.StructType) {
 			validateInt(b, nam, 32)
 		case "int64":
 			validateInt(b, nam, 64)
+
+		case "float32":
+			validateFloat(b, nam, 32)
+		case "float64":
+			validateFloat(b, nam, 64)
 		}
 	}
 
