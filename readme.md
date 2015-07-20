@@ -9,5 +9,10 @@ Future Work
 -----------
  - Include comments from original source `.v`.
  - Add more types to validate beyond strconv "low-hanging fruit".
+    - Bounded strings
+    - Bounded numbers
+    - `*url.URL`
+    - `*mail.Address`
+    - Enums?
  - Handle weirder pre-existing imports in `.v` files, such as strconv
    imported as some other name.
