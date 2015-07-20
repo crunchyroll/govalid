@@ -43,7 +43,7 @@ func validateInt(b *buf, fldname string, bitSize int) {
 	b.writef("\tif err != nil {\n")
 	b.writef("\t\treturn nil, err\n")
 	b.writef("\t}\n")
-	// Have to cast since ParseUint returns an int64.  Superfluous
+	// Have to cast since ParseInt returns an int64.  Superfluous
 	// if bitSize is 64, but whatever.
 	b.writef("\tret.%s = int%d(%sTmp)\n", fldname, bitSize, fldname)
 }
