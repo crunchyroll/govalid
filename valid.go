@@ -24,6 +24,8 @@ func validateBool(b *buf, fldname string) {
 	b.writef("\t}\n")
 }
 
+// validateUint writes validator code for a uint of the given bitSize to
+// the given *buf.
 func validateUint(b *buf, fldname string, bitSize int) {
 	b.writef("\t%sTmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	b.writef("\tif err != nil {\n")
