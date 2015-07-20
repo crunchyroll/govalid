@@ -51,6 +51,7 @@ func validator(b *buf, name string, s *ast.StructType) {
 		switch typ.Name {
 		case "string":
 			validateString(b, nam)
+
 		case "bool":
 			validateBool(b, nam)
 			b.needsStrconv = true
