@@ -16,3 +16,7 @@ Future Work
     - Enums?
  - Handle weirder pre-existing imports in `.v` files, such as strconv
    imported as some other name.
+ - Nicer error reporting.  Ideally, the validation library would give
+   you an error object from which you could easily generate a
+   human-readable string indicating all of the bad fields passed in and
+   why they were bad.
