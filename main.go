@@ -80,7 +80,7 @@ func process(filename string, file *os.File) error {
 		return err
 	}
 
-	// Next, output original file.
+	// Next, output original code.
 	err = printer.Fprint(dst, fset, astfile)
 	if err != nil {
 		return err
