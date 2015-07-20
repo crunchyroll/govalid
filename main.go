@@ -28,7 +28,7 @@ func process(filename string, file *os.File) error {
 
 	// Parse first before outputting anything.
 	fset := token.NewFileSet()
-	mode := parser.AllErrors
+	mode := parser.DeclarationErrors | parser.AllErrors
 	astfile, err := parser.ParseFile(fset, filename, file, mode)
 	if err != nil {
 		return err
