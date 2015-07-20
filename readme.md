@@ -4,6 +4,7 @@ TODO
  - Fuzz test with randomly-generated, but linguistically valid input go
    source files.  Auto-generate based on grammar from go/\* packages?
  - Godoc functions, etc.
+ - Document how ints can be specified in "any" base.
 
 Future Work
 -----------
