@@ -86,13 +86,8 @@ func process(filename string, file *os.File) error {
 		return err
 	}
 
-	// Newline to separate things.
-	_, err = fmt.Println()
-	if err != nil {
-		return err
-	}
-
-	// Output generated code (from the buf).
+	// Output generated code (from the buf).  Includes a leading
+	// newline to separate from the original code.
 	io.Copy(dst, b)
 
 	return nil

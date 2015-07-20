@@ -37,6 +37,7 @@ func validator(b *buf, name string, s *ast.StructType) {
 		fname = fmt.Sprintf("validate%s", strings.Title(name))
 	}
 
+	b.writef("\n") // Newline to separate from above content.
 	b.writef("func %s(data map[string]string) (*%s, error) {\n", fname, name)
 	b.writef("\tret := new(%s)\n", name)
 
