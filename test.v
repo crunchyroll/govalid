@@ -33,11 +33,8 @@ type fooTypeSet struct {
 	u16 uint16
 	u32 uint32
 	u64 uint64
-}
 
-type blahTypeSet struct {
-	r rune // well-defined?
-	by byte // well-defined?
+  // No rune or byte.
 }
 
 type PublicStruct struct {
@@ -45,15 +42,15 @@ type PublicStruct struct {
 }
 
 type badTypeSet struct {
-	bad1 blahTypeSet
-	bad2 *blahTypeSet
-	bad3 []blahTypeSet
-	bad4 map[string]blahTypeSet
+	bad1 fooTypeSet
+	bad2 *fooTypeSet
+	bad3 []fooTypeSet
+	bad4 map[string]fooTypeSet
 }
 
 type mixed struct {
 	x int
-	bad1 blahTypeSet
+	bad1 fooTypeSet
 }
 
 type empty struct {
