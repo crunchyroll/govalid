@@ -99,8 +99,20 @@ func validator(buf *bytes.Buffer, name string, s *ast.StructType) (needsStrconv 
 	}
 
 	write(buf, "\n") // Newline to separate from above content.
+
+	write(buf, "// %s reads data from the given map of strings to\n", funcname)
+	write(buf, "// strings and validates the data into a new *%s.\n", name)
+	write(buf, "// Fields named in a %s will be recognized as keys.\n", name)
+	write(buf, "// Keys in the input data that are not fields in the\n")
+	write(buf, "// %s will be ignored.  If there is an error\n", name)
+	write(buf, "// validating any fields, an appropriate error will\n")
+	write(buf, "// be returned.\n")
+
 	write(buf, "func %s(data map[string]string) (*%s, error) {\n", funcname, name)
 	write(buf, "\tret := new(%s)\n", name)
+
+	// This declaration will cause a compile error if there are no
+	// fields in the struct for which we can generate validators.
 	write(buf, "\tvar err error\n")
 
 	for _, fld := range s.Fields.List {

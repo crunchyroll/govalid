@@ -2,7 +2,6 @@ TODO
 ----
  - Fuzz test with randomly-generated, but linguistically valid input go
    source files.  Auto-generate based on grammar from go/\* packages?
- - Generate GoDoc comment for generated function.
  - Document how if the struct has no validate-able fields, there will be
    a compiler error because of the unused err variable.
  - Godoc functions, etc.
