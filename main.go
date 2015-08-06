@@ -87,8 +87,7 @@ func process(filename string, input io.Reader) error {
 		return err
 	}
 
-	// Output generated code (from the buf).  Includes a leading
-	// newline to separate from the original code.
+	// Output generated code (from the buffer).
 	io.Copy(dst, buf)
 
 	return nil

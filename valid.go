@@ -18,12 +18,13 @@ func write(buf *bytes.Buffer, format string, a ...interface{}) {
 	buf.WriteString(fmt.Sprintf(format, a...))
 }
 
-// validateString writes validator code for a string to the given *buf.
+// validateString writes validator code for a string to the given
+// buffer.
 func validateString(buf *bytes.Buffer, fldname string) {
 	write(buf, "\tret.%s = data[\"%s\"]\n", fldname, fldname)
 }
 
-// validateBool writes validator code for a bool to the given *buf.
+// validateBool writes validator code for a bool to the given buffer.
 func validateBool(buf *bytes.Buffer, fldname string) {
 	write(buf, "\tret.%s, err = strconv.ParseBool(data[\"%s\"])\n", fldname, fldname)
 	write(buf, "\tif err != nil {\n")
@@ -35,7 +36,7 @@ func validateBool(buf *bytes.Buffer, fldname string) {
 // code between the numeric validators.
 
 // validateUint writes validator code for a uint of the given bitSize to
-// the given *buf.
+// the given buffer.
 func validateUint(buf *bytes.Buffer, fldname string, bitSize int) {
 	write(buf, "\t%sTmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
@@ -47,7 +48,7 @@ func validateUint(buf *bytes.Buffer, fldname string, bitSize int) {
 }
 
 // validateUint writes validator code for a uint of
-// implementation-specific size to the given *buf.
+// implementation-specific size to the given buffer.
 func validateUintBare(buf *bytes.Buffer, fldname string) {
 	write(buf, "\tret.%s, err = strconv.ParseUint(data[\"%s\"], 0, 0)\n", fldname, fldname)
 	write(buf, "\tif err != nil {\n")
@@ -56,7 +57,7 @@ func validateUintBare(buf *bytes.Buffer, fldname string) {
 }
 
 // validateInt writes validator code for an int of the given bitSize to
-// the given *buf.
+// the given buffer.
 func validateInt(buf *bytes.Buffer, fldname string, bitSize int) {
 	write(buf, "\t%sTmp, err = strconv.ParseInt(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
@@ -68,7 +69,7 @@ func validateInt(buf *bytes.Buffer, fldname string, bitSize int) {
 }
 
 // validateInt writes validator code for an int of
-// implementation-specific size to the given *buf.
+// implementation-specific size to the given buffer.
 func validateIntBare(buf *bytes.Buffer, fldname string) {
 	write(buf, "\tret.%s, err = strconv.ParseInt(data[\"%s\"], 0, 0)\n", fldname, fldname)
 	write(buf, "\tif err != nil {\n")
@@ -77,7 +78,7 @@ func validateIntBare(buf *bytes.Buffer, fldname string) {
 }
 
 // validateFloat writes validator code for a float of the given bitSize to
-// the given *buf.
+// the given buffer.
 func validateFloat(buf *bytes.Buffer, fldname string, bitSize int) {
 	write(buf, "\t%sTmp, err = strconv.ParseFloat(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
@@ -89,9 +90,9 @@ func validateFloat(buf *bytes.Buffer, fldname string, bitSize int) {
 }
 
 // validator writes validator code for the given struct to the given
-// *buf.  It iterates through the struct fields, and for those for which
-// it can generate validator code, it does so.  It returns whether or
-// not the strconv package is needed by the generated code.
+// buffer.  It iterates through the struct fields, and for those for
+// which it can generate validator code, it does so.  It returns whether
+// or not the strconv package is needed by the generated code.
 func validator(buf *bytes.Buffer, name string, s *ast.StructType) (needsStrconv bool) {
 	first, _ := utf8.DecodeRune([]byte(name))
 	isPublic := unicode.IsUpper(first)
