@@ -155,7 +155,7 @@ func validator(buf *bytes.Buffer, name string, s *ast.StructType) (needsStrconv 
 		}
 	}
 
-	write(buf, "\t\n")
+	write(buf, "\n")
 	write(buf, "\treturn ret, nil\n")
 	write(buf, "}\n")
 
