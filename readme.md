@@ -6,7 +6,13 @@ TODO
  - Document how if the struct has no validate-able fields, there will be
    a compiler error because of the unused err variable.
  - Godoc functions, etc.
- - Document how ints, uints can be specified in "any" base.
+
+Integer Bases
+-------------
+The generated validation code for `int`s and `uint`s uses a base of 0,
+so input strings may be in any base represented by the
+`strconv.ParseInt` or `strconv.ParseUint` functions.  For example, a
+hexadecimal values would be parsed by passing in `0xbeef`.
 
 Future Work
 -----------
