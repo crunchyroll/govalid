@@ -39,7 +39,7 @@ func hasImport(astfile *ast.File, name string) bool {
 // list of imports in the *ast.File.
 func prependImport(astfile *ast.File, name string) {
 	litvalue := fmt.Sprintf("\"%s\"", name)
-	commentText := fmt.Sprintf("// *** %s IMPORT ADDED BY %s ***", name, progUpper)
+	commentText := fmt.Sprintf("// *** %s IMPORT ADDED BY %s ***", name, args.progUpper)
 	comment := &ast.CommentGroup{
 		List: []*ast.Comment{
 			&ast.Comment{
