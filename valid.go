@@ -48,6 +48,8 @@ func validateUint(buf *bytes.Buffer, fldname string, bitSize int) {
 		write(buf, "\tret.%s = uint(%stmp)\n", fldname, fldname)
 	} else if bitSize != 64 {
 		write(buf, "\tret.%s = uint%d(%stmp)\n", fldname, bitSize, fldname)
+	} else {
+		write(buf, "\tret.%s = %stmp\n", fldname, fldname)
 	}
 }
 
@@ -64,6 +66,8 @@ func validateInt(buf *bytes.Buffer, fldname string, bitSize int) {
 		write(buf, "\tret.%s = int(%stmp)\n", fldname, fldname)
 	} else if bitSize != 64 {
 		write(buf, "\tret.%s = int%d(%stmp)\n", fldname, bitSize, fldname)
+	} else {
+		write(buf, "\tret.%s = %stmp\n", fldname, fldname)
 	}
 }
 
