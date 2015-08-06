@@ -38,13 +38,13 @@ func validateBool(buf *bytes.Buffer, fldname string) {
 // validateUint writes validator code for a uint of the given bitSize to
 // the given buffer.
 func validateUint(buf *bytes.Buffer, fldname string, bitSize int) {
-	write(buf, "\t%sTmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	write(buf, "\t%stmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
 	write(buf, "\t\treturn nil, err\n")
 	write(buf, "\t}\n")
 	// Have to cast since ParseUint returns a uint64.  Superfluous
 	// if bitSize is 64, but whatever.
-	write(buf, "\tret.%s = uint%d(%sTmp)\n", fldname, bitSize, fldname)
+	write(buf, "\tret.%s = uint%d(%stmp)\n", fldname, bitSize, fldname)
 }
 
 // validateUint writes validator code for a uint of
@@ -59,13 +59,13 @@ func validateUintBare(buf *bytes.Buffer, fldname string) {
 // validateInt writes validator code for an int of the given bitSize to
 // the given buffer.
 func validateInt(buf *bytes.Buffer, fldname string, bitSize int) {
-	write(buf, "\t%sTmp, err = strconv.ParseInt(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	write(buf, "\t%stmp, err = strconv.ParseInt(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
 	write(buf, "\t\treturn nil, err\n")
 	write(buf, "\t}\n")
 	// Have to cast since ParseInt returns an int64.  Superfluous
 	// if bitSize is 64, but whatever.
-	write(buf, "\tret.%s = int%d(%sTmp)\n", fldname, bitSize, fldname)
+	write(buf, "\tret.%s = int%d(%stmp)\n", fldname, bitSize, fldname)
 }
 
 // validateInt writes validator code for an int of
@@ -80,13 +80,13 @@ func validateIntBare(buf *bytes.Buffer, fldname string) {
 // validateFloat writes validator code for a float of the given bitSize to
 // the given buffer.
 func validateFloat(buf *bytes.Buffer, fldname string, bitSize int) {
-	write(buf, "\t%sTmp, err = strconv.ParseFloat(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	write(buf, "\t%stmp, err = strconv.ParseFloat(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
 	write(buf, "\t\treturn nil, err\n")
 	write(buf, "\t}\n")
 	// Have to cast since ParseFloat returns a float64.  Superfluous
 	// if bitSize is 64, but whatever.
-	write(buf, "\tret.%s = float%d(%sTmp)\n", fldname, bitSize, fldname)
+	write(buf, "\tret.%s = float%d(%stmp)\n", fldname, bitSize, fldname)
 }
 
 // validator writes validator code for the given struct to the given
