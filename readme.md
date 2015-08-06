@@ -5,6 +5,8 @@ TODO
  - Document how if the struct has no validate-able fields, there will be
    a compiler error because of the unused err variable.
  - Godoc functions, etc.
+ - Make readme publicly-consumable.
+ - Add CR license.
 
 Integer Bases
 -------------
