@@ -106,6 +106,7 @@ func validator(buf *bytes.Buffer, name string, s *ast.StructType) (needsStrconv 
 	write(buf, "\n") // Newline to separate from above content.
 	write(buf, "func %s(data map[string]string) (*%s, error) {\n", funcname, name)
 	write(buf, "\tret := new(%s)\n", name)
+	write(buf, "\tvar err error\n")
 
 	for _, fld := range s.Fields.List {
 		nam := fld.Names[0].Name
