@@ -15,16 +15,19 @@ hexadecimal values would be parsed by passing in `0xbeef`.
 
 Future Work
 -----------
- - Include comments from original source `.v`.
- - Add more types to validate beyond strconv "low-hanging fruit".
-    - Bounded strings
-    - Bounded numbers
+ - Add more types to validate:
     - `*url.URL`
     - `*mail.Address`
-    - Enums?
- - Handle weirder pre-existing imports in `.v` files, such as strconv
-   imported as some other name.
+ - Add more types to validate:
+    - Bounded strings
+    - Bounded numbers
+ - Optional fields.
  - Nicer error reporting.  Ideally, the validation library would give
    you an error object from which you could easily generate a
    human-readable string indicating all of the bad fields passed in and
    why they were bad.
+ - Add more types to validate:
+    - Enums?
+ - Include comments from original source.
+ - Handle weirder pre-existing imports source files, such as strconv
+   imported as some other name.
