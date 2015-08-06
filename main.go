@@ -20,16 +20,16 @@ import (
 var prog string
 var progUpper string
 
-// process parses the input file, finds struct definitions, and invokes
-// the validator code to produce validators for the struct definitions.
-// It prints the original code plus the generated code to standard out.
-func process(filename string, file *os.File) error {
+// process parses the input, finds struct definitions, and invokes the
+// validator code to produce validators for the struct definitions.  It
+// prints the original code plus the generated code to standard out.
+func process(filename string, input io.Reader) error {
 	dst := os.Stdout // Destination.
 
 	// Parse first before outputting anything.
 	fset := token.NewFileSet()
 	mode := parser.DeclarationErrors | parser.AllErrors
-	astfile, err := parser.ParseFile(fset, filename, file, mode)
+	astfile, err := parser.ParseFile(fset, filename, input, mode)
 	if err != nil {
 		return err
 	}
@@ -38,11 +38,7 @@ func process(filename string, file *os.File) error {
 	// We do this because we need to know whether we need to augment
 	// the import list before outputting any declarations (imports
 	// must precede declarations).
-	fi, err := file.Stat()
-	if err != nil {
-		return err
-	}
-	b := newBuf(fi.Size())
+	b := newBuf()
 
 	// Isolate the struct types--the things for which we want to
 	// generate validator functions.
@@ -94,7 +90,7 @@ func process(filename string, file *os.File) error {
 }
 
 func usage() {
-	log.Printf("usage: %s file.v", path.Base(os.Args[0]))
+	log.Printf("usage: %s [file.v]", path.Base(os.Args[0]))
 	os.Exit(2)
 }
 
@@ -105,27 +101,23 @@ func init() {
 }
 
 func main() {
-	if len(os.Args) != 2 {
-		usage()
-	}
-
-	filename := os.Args[1]
-	if filename == "" {
-		usage()
-	}
-
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		err := file.Close()
+	var filename string
+	var input    io.Reader
+	if len(os.Args) == 1 {
+		filename = "-"
+		input = os.Stdin
+	} else if len(os.Args) == 2 {
+		filename = os.Args[1]
+		file, err := os.Open(filename)
 		if err != nil {
-			log.Println(err)
+			log.Fatal(err)
 		}
-	}()
-
-	err = process(filename, file)
+		defer file.Close()
+		input = file
+	} else {
+		usage()
+	}
+	err := process(filename, input)
 	if err != nil {
 		log.Fatal(err)
 	}
