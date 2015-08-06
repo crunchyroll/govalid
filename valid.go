@@ -38,49 +38,40 @@ func validateBool(buf *bytes.Buffer, fldname string) {
 // validateUint writes validator code for a uint of the given bitSize to
 // the given buffer.
 func validateUint(buf *bytes.Buffer, fldname string, bitSize int) {
+	write(buf, "\tvar %stmp uint64\n", fldname)
 	write(buf, "\t%stmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
 	write(buf, "\t\treturn nil, err\n")
 	write(buf, "\t}\n")
-	// Have to cast since ParseUint returns a uint64.  Superfluous
-	// if bitSize is 64, but whatever.
-	write(buf, "\tret.%s = uint%d(%stmp)\n", fldname, bitSize, fldname)
-}
-
-// validateUint writes validator code for a uint of
-// implementation-specific size to the given buffer.
-func validateUintBare(buf *bytes.Buffer, fldname string) {
-	write(buf, "\tret.%s, err = strconv.ParseUint(data[\"%s\"], 0, 0)\n", fldname, fldname)
-	write(buf, "\tif err != nil {\n")
-	write(buf, "\t\treturn nil, err\n")
-	write(buf, "\t}\n")
+	// Have to cast since ParseUint returns a uint64.
+	if bitSize == 0 {
+		write(buf, "\tret.%s = uint(%stmp)\n", fldname, fldname)
+	} else if bitSize != 64 {
+		write(buf, "\tret.%s = uint%d(%stmp)\n", fldname, bitSize, fldname)
+	}
 }
 
 // validateInt writes validator code for an int of the given bitSize to
 // the given buffer.
 func validateInt(buf *bytes.Buffer, fldname string, bitSize int) {
+	write(buf, "\tvar %stmp int64\n", fldname)
 	write(buf, "\t%stmp, err = strconv.ParseInt(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
 	write(buf, "\t\treturn nil, err\n")
 	write(buf, "\t}\n")
-	// Have to cast since ParseInt returns an int64.  Superfluous
-	// if bitSize is 64, but whatever.
-	write(buf, "\tret.%s = int%d(%stmp)\n", fldname, bitSize, fldname)
-}
-
-// validateInt writes validator code for an int of
-// implementation-specific size to the given buffer.
-func validateIntBare(buf *bytes.Buffer, fldname string) {
-	write(buf, "\tret.%s, err = strconv.ParseInt(data[\"%s\"], 0, 0)\n", fldname, fldname)
-	write(buf, "\tif err != nil {\n")
-	write(buf, "\t\treturn nil, err\n")
-	write(buf, "\t}\n")
+	// Have to cast since ParseInt returns an int64.
+	if bitSize == 0 {
+		write(buf, "\tret.%s = int(%stmp)\n", fldname, fldname)
+	} else if bitSize != 64 {
+		write(buf, "\tret.%s = int%d(%stmp)\n", fldname, bitSize, fldname)
+	}
 }
 
 // validateFloat writes validator code for a float of the given bitSize to
 // the given buffer.
 func validateFloat(buf *bytes.Buffer, fldname string, bitSize int) {
-	write(buf, "\t%stmp, err = strconv.ParseFloat(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	write(buf, "\tvar %stmp float64\n", fldname)
+	write(buf, "\t%stmp, err = strconv.ParseFloat(data[\"%s\"], %d)\n", fldname, fldname, bitSize)
 	write(buf, "\tif err != nil {\n")
 	write(buf, "\t\treturn nil, err\n")
 	write(buf, "\t}\n")
@@ -124,7 +115,7 @@ func validator(buf *bytes.Buffer, name string, s *ast.StructType) (needsStrconv 
 			needsStrconv = true
 
 		case "uint":
-			validateUintBare(buf, nam)
+			validateUint(buf, nam, 0)
 			needsStrconv = true
 		case "uint8":
 			validateUint(buf, nam, 8)
@@ -140,7 +131,7 @@ func validator(buf *bytes.Buffer, name string, s *ast.StructType) (needsStrconv 
 			needsStrconv = true
 
 		case "int":
-			validateIntBare(buf, nam)
+			validateInt(buf, nam, 0)
 			needsStrconv = true
 		case "int8":
 			validateInt(buf, nam, 8)
