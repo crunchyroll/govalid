@@ -41,17 +41,7 @@ type PublicStruct struct {
 	x int
 }
 
-type badTypeSet struct {
-	bad1 fooTypeSet
-	bad2 *fooTypeSet
-	bad3 []fooTypeSet
-	bad4 map[string]fooTypeSet
-}
-
 type mixed struct {
 	x int
 	bad1 fooTypeSet
-}
-
-type empty struct {
 }
