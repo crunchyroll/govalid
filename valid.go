@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"unicode"
@@ -11,17 +12,23 @@ import (
 	"unicode/utf8"
 )
 
+// write uses fmt.Sprintf on its arguments and writes the resultant
+// string into the given buffer.
+func write(buf *bytes.Buffer, format string, a ...interface{}) {
+	buf.WriteString(fmt.Sprintf(format, a...))
+}
+
 // validateString writes validator code for a string to the given *buf.
-func validateString(b *buf, fldname string) {
-	b.writef("\tret.%s = data[\"%s\"]\n", fldname, fldname)
+func validateString(buf *bytes.Buffer, fldname string) {
+	write(buf, "\tret.%s = data[\"%s\"]\n", fldname, fldname)
 }
 
 // validateBool writes validator code for a bool to the given *buf.
-func validateBool(b *buf, fldname string) {
-	b.writef("\tret.%s, err = strconv.ParseBool(data[\"%s\"])\n", fldname, fldname)
-	b.writef("\tif err != nil {\n")
-	b.writef("\t\treturn nil, err\n")
-	b.writef("\t}\n")
+func validateBool(buf *bytes.Buffer, fldname string) {
+	write(buf, "\tret.%s, err = strconv.ParseBool(data[\"%s\"])\n", fldname, fldname)
+	write(buf, "\tif err != nil {\n")
+	write(buf, "\t\treturn nil, err\n")
+	write(buf, "\t}\n")
 }
 
 // It would be nice if we didn't have so much duplication of generated
@@ -29,74 +36,75 @@ func validateBool(b *buf, fldname string) {
 
 // validateUint writes validator code for a uint of the given bitSize to
 // the given *buf.
-func validateUint(b *buf, fldname string, bitSize int) {
-	b.writef("\t%sTmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
-	b.writef("\tif err != nil {\n")
-	b.writef("\t\treturn nil, err\n")
-	b.writef("\t}\n")
+func validateUint(buf *bytes.Buffer, fldname string, bitSize int) {
+	write(buf, "\t%sTmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	write(buf, "\tif err != nil {\n")
+	write(buf, "\t\treturn nil, err\n")
+	write(buf, "\t}\n")
 	// Have to cast since ParseUint returns a uint64.  Superfluous
 	// if bitSize is 64, but whatever.
-	b.writef("\tret.%s = uint%d(%sTmp)\n", fldname, bitSize, fldname)
+	write(buf, "\tret.%s = uint%d(%sTmp)\n", fldname, bitSize, fldname)
 }
 
 // validateUint writes validator code for a uint of
 // implementation-specific size to the given *buf.
-func validateUintBare(b *buf, fldname string) {
-	b.writef("\tret.%s, err = strconv.ParseUint(data[\"%s\"], 0, 0)\n", fldname, fldname)
-	b.writef("\tif err != nil {\n")
-	b.writef("\t\treturn nil, err\n")
-	b.writef("\t}\n")
+func validateUintBare(buf *bytes.Buffer, fldname string) {
+	write(buf, "\tret.%s, err = strconv.ParseUint(data[\"%s\"], 0, 0)\n", fldname, fldname)
+	write(buf, "\tif err != nil {\n")
+	write(buf, "\t\treturn nil, err\n")
+	write(buf, "\t}\n")
 }
 
 // validateInt writes validator code for an int of the given bitSize to
 // the given *buf.
-func validateInt(b *buf, fldname string, bitSize int) {
-	b.writef("\t%sTmp, err = strconv.ParseInt(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
-	b.writef("\tif err != nil {\n")
-	b.writef("\t\treturn nil, err\n")
-	b.writef("\t}\n")
+func validateInt(buf *bytes.Buffer, fldname string, bitSize int) {
+	write(buf, "\t%sTmp, err = strconv.ParseInt(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	write(buf, "\tif err != nil {\n")
+	write(buf, "\t\treturn nil, err\n")
+	write(buf, "\t}\n")
 	// Have to cast since ParseInt returns an int64.  Superfluous
 	// if bitSize is 64, but whatever.
-	b.writef("\tret.%s = int%d(%sTmp)\n", fldname, bitSize, fldname)
+	write(buf, "\tret.%s = int%d(%sTmp)\n", fldname, bitSize, fldname)
 }
 
 // validateInt writes validator code for an int of
 // implementation-specific size to the given *buf.
-func validateIntBare(b *buf, fldname string) {
-	b.writef("\tret.%s, err = strconv.ParseInt(data[\"%s\"], 0, 0)\n", fldname, fldname)
-	b.writef("\tif err != nil {\n")
-	b.writef("\t\treturn nil, err\n")
-	b.writef("\t}\n")
+func validateIntBare(buf *bytes.Buffer, fldname string) {
+	write(buf, "\tret.%s, err = strconv.ParseInt(data[\"%s\"], 0, 0)\n", fldname, fldname)
+	write(buf, "\tif err != nil {\n")
+	write(buf, "\t\treturn nil, err\n")
+	write(buf, "\t}\n")
 }
 
 // validateFloat writes validator code for a float of the given bitSize to
 // the given *buf.
-func validateFloat(b *buf, fldname string, bitSize int) {
-	b.writef("\t%sTmp, err = strconv.ParseFloat(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
-	b.writef("\tif err != nil {\n")
-	b.writef("\t\treturn nil, err\n")
-	b.writef("\t}\n")
+func validateFloat(buf *bytes.Buffer, fldname string, bitSize int) {
+	write(buf, "\t%sTmp, err = strconv.ParseFloat(data[\"%s\"], 0, %d)\n", fldname, fldname, bitSize)
+	write(buf, "\tif err != nil {\n")
+	write(buf, "\t\treturn nil, err\n")
+	write(buf, "\t}\n")
 	// Have to cast since ParseFloat returns a float64.  Superfluous
 	// if bitSize is 64, but whatever.
-	b.writef("\tret.%s = float%d(%sTmp)\n", fldname, bitSize, fldname)
+	write(buf, "\tret.%s = float%d(%sTmp)\n", fldname, bitSize, fldname)
 }
 
 // validator writes validator code for the given struct to the given
 // *buf.  It iterates through the struct fields, and for those for which
-// it can generate validator code, it does so.
-func validator(b *buf, name string, s *ast.StructType) {
+// it can generate validator code, it does so.  It returns whether or
+// not the strconv package is needed by the generated code.
+func validator(buf *bytes.Buffer, name string, s *ast.StructType) (needsStrconv bool) {
 	first, _ := utf8.DecodeRune([]byte(name))
 	isPublic := unicode.IsUpper(first)
-	var fname string
+	var funcname string
 	if isPublic {
-		fname = fmt.Sprintf("Validate%s", name)
+		funcname = fmt.Sprintf("Validate%s", name)
 	} else {
-		fname = fmt.Sprintf("validate%s", strings.Title(name))
+		funcname = fmt.Sprintf("validate%s", strings.Title(name))
 	}
 
-	b.writef("\n") // Newline to separate from above content.
-	b.writef("func %s(data map[string]string) (*%s, error) {\n", fname, name)
-	b.writef("\tret := new(%s)\n", name)
+	write(buf, "\n") // Newline to separate from above content.
+	write(buf, "func %s(data map[string]string) (*%s, error) {\n", funcname, name)
+	write(buf, "\tret := new(%s)\n", name)
 
 	for _, fld := range s.Fields.List {
 		nam := fld.Names[0].Name
@@ -104,45 +112,59 @@ func validator(b *buf, name string, s *ast.StructType) {
 		if !ok {
 			continue
 		}
-		b.writef("\t// %s %s\n", nam, typ)
+		write(buf, "\t// %s %s\n", nam, typ)
 		switch typ.Name {
 		case "string":
-			validateString(b, nam)
+			validateString(buf, nam)
 
 		case "bool":
-			validateBool(b, nam)
-			b.needsStrconv = true
+			validateBool(buf, nam)
+			needsStrconv = true
 
 		case "uint":
-			validateUintBare(b, nam)
+			validateUintBare(buf, nam)
+			needsStrconv = true
 		case "uint8":
-			validateUint(b, nam, 8)
+			validateUint(buf, nam, 8)
+			needsStrconv = true
 		case "uint16":
-			validateUint(b, nam, 16)
+			validateUint(buf, nam, 16)
+			needsStrconv = true
 		case "uint32":
-			validateUint(b, nam, 32)
+			validateUint(buf, nam, 32)
+			needsStrconv = true
 		case "uint64":
-			validateUint(b, nam, 64)
+			validateUint(buf, nam, 64)
+			needsStrconv = true
 
 		case "int":
-			validateIntBare(b, nam)
+			validateIntBare(buf, nam)
+			needsStrconv = true
 		case "int8":
-			validateInt(b, nam, 8)
+			validateInt(buf, nam, 8)
+			needsStrconv = true
 		case "int16":
-			validateInt(b, nam, 16)
+			validateInt(buf, nam, 16)
+			needsStrconv = true
 		case "int32":
-			validateInt(b, nam, 32)
+			validateInt(buf, nam, 32)
+			needsStrconv = true
 		case "int64":
-			validateInt(b, nam, 64)
+			validateInt(buf, nam, 64)
+			needsStrconv = true
 
 		case "float32":
-			validateFloat(b, nam, 32)
+			validateFloat(buf, nam, 32)
+			needsStrconv = true
 		case "float64":
-			validateFloat(b, nam, 64)
+			validateFloat(buf, nam, 64)
+			needsStrconv = true
 		}
 	}
 
-	b.writef("\t\n")
-	b.writef("\treturn ret, nil\n")
-	b.writef("}\n")
+	write(buf, "\t\n")
+	write(buf, "\treturn ret, nil\n")
+	write(buf, "}\n")
+
+	return needsStrconv
 }

@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -38,7 +39,9 @@ func process(filename string, input io.Reader) error {
 	// We do this because we need to know whether we need to augment
 	// the import list before outputting any declarations (imports
 	// must precede declarations).
-	b := newBuf()
+	buf := new(bytes.Buffer)
+
+	needsStrconv := false
 
 	// Isolate the struct types--the things for which we want to
 	// generate validator functions.
@@ -60,13 +63,15 @@ func process(filename string, input io.Reader) error {
 
 		// Ok, we isolated the struct type, now output a
 		// validator for it.
-		validator(b, ts.Name.Name, s)
+		if validator(buf, ts.Name.Name, s) {
+			needsStrconv = true
+		}
 	}
 
 	// Add strconv import if needed.  Also, make more generic if
 	// need be.  (E.g., adding other imports besides strconv, doing
 	// non-linear search through existing imports, etc.)
-	if b.needsStrconv && !hasImport(astfile, "strconv") {
+	if needsStrconv && !hasImport(astfile, "strconv") {
 		prependImport(astfile, "strconv")
 	}
 
@@ -84,7 +89,7 @@ func process(filename string, input io.Reader) error {
 
 	// Output generated code (from the buf).  Includes a leading
 	// newline to separate from the original code.
-	io.Copy(dst, b)
+	io.Copy(dst, buf)
 
 	return nil
 }
