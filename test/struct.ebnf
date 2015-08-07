@@ -2,7 +2,11 @@ string_type = "string" .
 bool_type = "bool" .
 float_type = "float" ( "32" | "64" ) .
 int_type = [ "u" ] "int" ( "8" | "16" | "32" | "64" ) .
-simple_type = string_type | bool_type | float_type | int_type .
+complex_type = "complex" ( "64" | "128" ) .
+byte_type = "byte" .
+rune_type = "rune" .
+simple_type = string_type | bool_type | float_type | int_type |
+  complex_type | byte_type | rune_type .
 pkg_type = "mail.Address" | "url.URL" | "bytes.Buffer" .
 pointer_type = "*" ( simple_type | pkg_type ) .
 type = simple_type | pointer_type .
