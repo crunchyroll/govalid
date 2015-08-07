@@ -8,7 +8,7 @@ Documentation
 Testing
 -------
 Run `go test` to test.  You may want to run `go test -short` to avoid
-fuzz testing of random input programs based off of the
+[fuzz testing][1] of random input programs based off of the
 `test/struct.ebnf` grammar.
 
 Future Work
@@ -28,3 +28,5 @@ Future Work
    imported as some other name.
  - Don't generate bad code if there are no validatable fields?
    Currently generates an unused `var err error`.
+
+[1]: https://en.wikipedia.org/wiki/Fuzz_testing
