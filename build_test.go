@@ -3,6 +3,7 @@
 package main
 
 import (
+	"io"
 	"os"
 	"path"
 	"testing"
@@ -10,8 +11,9 @@ import (
 	"os/exec"
 )
 
-func testBuild(t *testing.T, dstname, srcname string) ([]byte, error) {
-	testProcess(t, dstname, nil, srcname, nil)
+// testBuild handles cleaning up the destination file.
+func testBuild(t *testing.T, dstname, srcname string, src io.Reader) ([]byte, error) {
+	testProcess(t, dstname, nil, srcname, src)
 	defer os.Remove(dstname)
 
 	// XXX Isn't there a way to build without having to launch a
@@ -25,7 +27,7 @@ func testBuild(t *testing.T, dstname, srcname string) ([]byte, error) {
 func TestBuildComprehensive(t *testing.T) {
 	srcname := path.Join("test", "comp.v")
 	dstname := path.Join("test", "comp.go")
-	output, err := testBuild(t, dstname, srcname)
+	output, err := testBuild(t, dstname, srcname, nil)
 	if err != nil {
 		t.Errorf("build failed: %v, %s", err, output)
 	}
@@ -36,7 +38,7 @@ func TestBuildComprehensive(t *testing.T) {
 func TestBuildBad(t *testing.T) {
 	srcname := path.Join("test", "bad.v")
 	dstname := path.Join("test", "bad.go")
-	output, err := testBuild(t, dstname, srcname)
+	output, err := testBuild(t, dstname, srcname, nil)
 	if err == nil {
 		t.Errorf("build failed to fail: %s", output)
 	}

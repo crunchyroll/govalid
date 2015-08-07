@@ -1,0 +1,37 @@
+string_type = "string" .
+bool_type = "bool" .
+float_type = "float" ( "32" | "64" ) .
+int_type = [ "u" ] "int" ( "8" | "16" | "32" | "64" ) .
+type = string_type | bool_type | float_type | int_type .
+
+letter = "a" … "z" | "A" … "Z" .
+// Make names at least three letters long to avoid:
+//  - One-character names, which increase the chance of collisions.
+//  - Accidentally generating reserved words, such as "if".
+name = letter letter letter { letter } .
+
+field_name = name .
+struct_name = name .
+
+newline = "\n" .
+newlines = newline [ newline ] .
+
+comment = "// " name { " " name } newlines .
+tab_comment = "\t" comment .
+
+comments = [ comment ] [ comment ].
+tab_comments = [ tab_comment ] [ tab_comment ] .
+
+field = "\t" field_name " " type newlines .
+field_full = [ tab_comments ] field .
+struct = "type " struct_name " struct {" newlines
+  field_full { field_full } "}" newlines .
+
+// Optional "pre-existing" import of strconv.
+strconv_import = [ "import \"strconv\"" newlines ] .
+imports = strconv_import .
+
+package = "package test" newlines .
+file = comments package imports { struct } .
+
+Start = file .

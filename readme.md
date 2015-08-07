@@ -1,7 +1,5 @@
 TODO
 ----
- - Fuzz test with randomly-generated, but linguistically valid input go
-   source files.  Auto-generate based on grammar from go/\* packages?
  - Document how if the struct has no validate-able fields, there will be
    a compiler error because of the unused err variable.
  - Godoc functions, etc.
@@ -15,6 +13,12 @@ The generated validation code for `int`s and `uint`s uses a base of 0,
 so input strings may be in any base represented by the
 `strconv.ParseInt` or `strconv.ParseUint` functions.  For example, a
 hexadecimal values would be parsed by passing in `0xbeef`.
+
+Testing
+-------
+Run `go test` to test.  You may want to run `go test -short` to avoid
+fuzz testing of random input programs based off of the
+`test/struct.ebnf` grammar.
 
 Future Work
 -----------

@@ -15,7 +15,7 @@ import (
 )
 
 // Make sure that generated code isn't altered by running gofmt.
-func testFmt(t *testing.T, srcname string) {
+func testFmt(t *testing.T, srcname string, src io.Reader) {
 	var err error
 
 	var fmtin    io.WriteCloser
@@ -30,7 +30,7 @@ func testFmt(t *testing.T, srcname string) {
 	// gofmt output will be buffered here.
 	fmtbuf = new(bytes.Buffer)
 
-	testProcess(t, "-", validbuf, srcname, nil)
+	testProcess(t, "-", validbuf, srcname, src)
 	validbytes = validbuf.Bytes()
 
 	// XXX Isn't there a way to gofmt without having to launch a
@@ -86,5 +86,5 @@ func testFmt(t *testing.T, srcname string) {
 
 func TestFmt(t *testing.T) {
 	srcname := path.Join("test", "comp.v")
-	testFmt(t, srcname)
+	testFmt(t, srcname, nil)
 }
