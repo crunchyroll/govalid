@@ -39,7 +39,14 @@ func hasImport(astfile *ast.File, name string) bool {
 // list of imports in the *ast.File.
 func prependImport(astfile *ast.File, name string) {
 	litvalue := fmt.Sprintf("\"%s\"", name)
-	commentText := fmt.Sprintf("// *** %s IMPORT ADDED BY %s ***", name, args.progUpper)
+	// XXX The newline here at the beginning of the comment is a bit of
+	// a hack.  We'd like to find a way to include this comment
+	// above or to the right of the added import in the printed
+	// code.  However, the spacing doesn't come out correctly if
+	// just inserted into the AST as you'd think.  So in order for
+	// the generated code to be idempotent under gofmt, we have to
+	// insert a newline here at the beginning.
+	commentText := fmt.Sprintf("\n// *** %s IMPORT ADDED BY %s ***", name, args.progUpper)
 	comment := &ast.CommentGroup{
 		List: []*ast.Comment{
 			&ast.Comment{
