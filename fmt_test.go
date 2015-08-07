@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -12,14 +11,6 @@ import (
 
 	"os/exec"
 )
-
-type closeWrapper struct {
-	*bytes.Buffer
-}
-
-func (cw closeWrapper) Close() error {
-	return nil
-}
 
 // Make sure that generated code isn't altered by running gofmt.
 func testFmt(t *testing.T, dstname, srcname string) {
