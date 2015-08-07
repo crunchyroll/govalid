@@ -1,10 +1,13 @@
 TODO
 ----
+ - Experiment with re-implementing fmt test by not spawning so many
+   subprocesses and writing so many files to disk.
  - Fuzz test with randomly-generated, but linguistically valid input go
    source files.  Auto-generate based on grammar from go/\* packages?
  - Document how if the struct has no validate-able fields, there will be
    a compiler error because of the unused err variable.
  - Godoc functions, etc.
+ - Go format, vet, lint.
  - Make readme publicly-consumable.
  - Add CR license.
 
