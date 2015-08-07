@@ -18,10 +18,10 @@ import (
 func testFmt(t *testing.T, srcname string, src io.Reader) {
 	var err error
 
-	var fmtin    io.WriteCloser
-	var fmtout   io.ReadCloser
+	var fmtin io.WriteCloser
+	var fmtout io.ReadCloser
 	var validbuf *bytes.Buffer
-	var fmtbuf   *bytes.Buffer
+	var fmtbuf *bytes.Buffer
 
 	var validbytes []byte
 

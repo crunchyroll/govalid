@@ -29,7 +29,7 @@ func usage() {
 }
 
 func init() {
-	args.prog      = path.Base(os.Args[0])
+	args.prog = path.Base(os.Args[0])
 	args.progUpper = strings.ToUpper(args.prog)
 	log.SetFlags(0)
 	flag.Usage = usage
