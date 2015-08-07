@@ -9,28 +9,31 @@ import (
 	"testing"
 )
 
-func testProcess(t *testing.T, dstname string, dst io.WriteCloser, srcname string, src io.ReadCloser) {
-	var err error
-
+// The caller is responsible for cleaning up any left over files.  If
+// nil source or destination writers are passed in, thus instructing
+// testProcess to open files for them based on the given names, then
+// testProcess will close the opened files.
+func testProcess(t *testing.T, dstname string, dst io.Writer, srcname string, src io.Reader) {
 	if src == nil {
-		src, err = os.Open(srcname)
+		srcfile, err := os.Open(srcname)
 		if err != nil {
 			t.Error(err)
 		}
-		defer src.Close()
+		defer srcfile.Close()
+		src = srcfile
 	}
 
 	if dst == nil {
 		flag := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
-		dst, err = os.OpenFile(dstname, flag, 0666)
+		dstfile, err := os.OpenFile(dstname, flag, 0666)
 		if err != nil {
 			t.Error(err)
 		}
-		defer dst.Close()
+		defer dstfile.Close()
+		dst = dstfile
 	}
 
-	err = process(dst, srcname, src)
-	if err != nil {
+	if err := process(dst, srcname, src); err != nil {
 		t.Error(err)
 	}
 }

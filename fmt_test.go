@@ -3,27 +3,42 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"io"
-	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"os/exec"
+
+	"github.com/aryann/difflib"
 )
 
 // Make sure that generated code isn't altered by running gofmt.
-func testFmt(t *testing.T, dstname, srcname string) {
+func testFmt(t *testing.T, srcname string) {
 	var err error
-	var fmtout io.ReadCloser
-	var dst2 *os.File
-	var output []byte
 
-	testProcess(t, dstname, nil, srcname, nil)
-	defer os.Remove(dstname)
+	var fmtin    io.WriteCloser
+	var fmtout   io.ReadCloser
+	var validbuf *bytes.Buffer
+	var fmtbuf   *bytes.Buffer
 
-	cmd := exec.Command("gofmt", dstname)
+	var validbytes []byte
 
+	// process (i.e., "govalid" output) will be buffered here.
+	validbuf = new(bytes.Buffer)
+	// gofmt output will be buffered here.
+	fmtbuf = new(bytes.Buffer)
+
+	testProcess(t, "-", validbuf, srcname, nil)
+	validbytes = validbuf.Bytes()
+
+	cmd := exec.Command("gofmt")
+
+	fmtin, err = cmd.StdinPipe()
+	if err != nil {
+		t.Error(err)
+	}
 	fmtout, err = cmd.StdoutPipe()
 	if err != nil {
 		t.Error(err)
@@ -33,30 +48,41 @@ func testFmt(t *testing.T, dstname, srcname string) {
 		t.Error(err)
 	}
 
-	dstname2 := fmt.Sprintf("%s.fmt", dstname)
-	flag := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
-	dst2, err = os.OpenFile(dstname2, flag, 0666)
-	if err != nil {
-		t.Error(err)
-	}
-	defer dst2.Close()
-	defer os.Remove(dstname2)
-
-	io.Copy(dst2, fmtout)
+	sync := make(chan struct{})
+	go func() {
+		io.Copy(fmtin, bytes.NewBuffer(validbytes))
+		fmtin.Close()
+		sync <- struct{}{}
+	}()
+	go func() {
+		io.Copy(fmtbuf, fmtout)
+		sync <- struct{}{}
+	}()
+	<-sync
+	<-sync
 
 	if err := cmd.Wait(); err != nil {
 		t.Error(err)
 	}
 
-	cmd = exec.Command("diff", "-u", dstname, dstname2)
-	output, err = cmd.CombinedOutput()
-	if err != nil {
-		t.Errorf("gofmt output differs; %v\n%s\n", err, output)
+	if !bytes.Equal(validbytes, fmtbuf.Bytes()) {
+		t.Log("gofmt output differs")
+		validlines := strings.Split(string(validbytes), "\n")
+		fmtlines := strings.Split(string(fmtbuf.Bytes()), "\n")
+		diffrecords := difflib.Diff(validlines, fmtlines)
+		t.Log("--- valid output")
+		t.Log("+++ gofmt output")
+		for _, dr := range diffrecords {
+			if dr.Delta == difflib.Common {
+				continue
+			}
+			t.Log(dr)
+		}
+		t.Fail()
 	}
 }
 
 func TestFmt(t *testing.T) {
 	srcname := path.Join("test", "comp.v")
-	dstname := path.Join("test", "comp.go")
-	testFmt(t, dstname, srcname)
+	testFmt(t, srcname)
 }
