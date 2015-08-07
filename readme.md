@@ -1,7 +1,9 @@
-TODO
-----
- - Make readme publicly-consumable.
- - Add CR license.
+`govalid` generates validation code for maps of strings to strings to
+marshal the data into well-typed structures.
+
+Documentation
+-------------
+ - [GoDoc Documentation](https://godoc.org/chrispennello.com/go/govalid)
 
 Testing
 -------
