@@ -10,8 +10,8 @@ import (
 	"os/exec"
 )
 
-func testBuild(t *testing.T, srcname, dstname string) ([]byte, error) {
-	testProcess(t, srcname, dstname)
+func testBuild(t *testing.T, dstname, srcname string) ([]byte, error) {
+	testProcess(t, dstname, nil, srcname, nil)
 	defer os.Remove(dstname)
 
 	// XXX Isn't there a way to build without having to launch a
@@ -25,7 +25,7 @@ func testBuild(t *testing.T, srcname, dstname string) ([]byte, error) {
 func TestBuildComprehensive(t *testing.T) {
 	srcname := path.Join("test", "comp.v")
 	dstname := path.Join("test", "comp.go")
-	output, err := testBuild(t, srcname, dstname)
+	output, err := testBuild(t, dstname, srcname)
 	if err != nil {
 		t.Errorf("build failed: %v, %s", err, output)
 	}
@@ -36,7 +36,7 @@ func TestBuildComprehensive(t *testing.T) {
 func TestBuildBad(t *testing.T) {
 	srcname := path.Join("test", "bad.v")
 	dstname := path.Join("test", "bad.go")
-	output, err := testBuild(t, srcname, dstname)
+	output, err := testBuild(t, dstname, srcname)
 	if err == nil {
 		t.Errorf("build failed to fail: %s", output)
 	}
