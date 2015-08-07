@@ -20,8 +20,8 @@ import (
 func process(dst io.Writer, srcname string, src io.Reader) error {
 	// Parse first before outputting anything.
 	fset := token.NewFileSet()
-	mode := parser.DeclarationErrors | parser.AllErrors
-	astfile, err := parser.ParseFile(fset, srcname, src, mode)
+	parseMode := parser.DeclarationErrors | parser.AllErrors
+	astfile, err := parser.ParseFile(fset, srcname, src, parseMode)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,9 @@ func process(dst io.Writer, srcname string, src io.Reader) error {
 	}
 
 	// Next, output original code.
-	err = printer.Fprint(dst, fset, astfile)
+	printMode := printer.TabIndent | printer.UseSpaces
+	config := &printer.Config{Mode: printMode, Tabwidth: 8}
+	err = config.Fprint(dst, fset, astfile)
 	if err != nil {
 		return err
 	}
