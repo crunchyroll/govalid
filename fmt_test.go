@@ -33,6 +33,8 @@ func testFmt(t *testing.T, srcname string) {
 	testProcess(t, "-", validbuf, srcname, nil)
 	validbytes = validbuf.Bytes()
 
+	// XXX Isn't there a way to gofmt without having to launch a
+	// subprocess?
 	cmd := exec.Command("gofmt")
 
 	fmtin, err = cmd.StdinPipe()
