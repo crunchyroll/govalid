@@ -1,7 +1,7 @@
 // chris 080715
 
 // govalid generates validation code for maps of strings to strings to
-// marshal the data into well-type structures.
+// marshal the data into well-typed structures.
 //
 // Command-line invocation is as follows.
 //
