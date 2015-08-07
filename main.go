@@ -47,6 +47,8 @@ func init() {
 	args.dstname = *dstname
 }
 
+// main assigns input and output readers and writers based on the
+// command arguments and invokes process.
 func main() {
 	var (
 		src io.Reader

@@ -1,18 +1,7 @@
 TODO
 ----
- - Document how if the struct has no validate-able fields, there will be
-   a compiler error because of the unused err variable.
- - Godoc functions, etc.
- - Go format, vet, lint.
  - Make readme publicly-consumable.
  - Add CR license.
-
-Integer Bases
--------------
-The generated validation code for `int`s and `uint`s uses a base of 0,
-so input strings may be in any base represented by the
-`strconv.ParseInt` or `strconv.ParseUint` functions.  For example, a
-hexadecimal values would be parsed by passing in `0xbeef`.
 
 Testing
 -------
@@ -38,3 +27,5 @@ Future Work
  - Include comments from original source.
  - Handle weirder pre-existing imports source files, such as strconv
    imported as some other name.
+ - Don't generate bad code if there are no validatable fields?
+   Currently generates an unused `var err error`.
