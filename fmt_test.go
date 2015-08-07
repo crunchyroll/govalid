@@ -4,6 +4,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"path"
 	"strings"
@@ -85,6 +86,8 @@ func testFmt(t *testing.T, srcname string, src io.Reader) {
 }
 
 func TestFmt(t *testing.T) {
-	srcname := path.Join("test", "comp.v")
-	testFmt(t, srcname, nil)
+	for _, name := range goodnames {
+		srcname := path.Join("test", fmt.Sprintf("%s.v", name))
+		testFmt(t, srcname, nil)
+	}
 }

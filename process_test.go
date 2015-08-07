@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -39,8 +40,10 @@ func testProcess(t *testing.T, dstname string, dst io.Writer, srcname string, sr
 }
 
 func TestProcess(t *testing.T) {
-	srcname := path.Join("test", "comp.v")
-	dstname := path.Join("test", "comp.go")
-	testProcess(t, dstname, nil, srcname, nil)
-	defer os.Remove(dstname)
+	for _, name := range goodnames {
+		dstname := path.Join("test", fmt.Sprintf("%s.go", name))
+		srcname := path.Join("test", fmt.Sprintf("%s.v", name))
+		testProcess(t, dstname, nil, srcname, nil)
+		defer os.Remove(dstname)
+	}
 }

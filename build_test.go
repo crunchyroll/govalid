@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -22,14 +23,22 @@ func testBuild(t *testing.T, dstname, srcname string, src io.Reader) ([]byte, er
 	return cmd.CombinedOutput()
 }
 
-// Make sure that generated validation code from comprehensive test .v
-// file builds without error.
-func TestBuildComprehensive(t *testing.T) {
-	srcname := path.Join("test", "comp.v")
-	dstname := path.Join("test", "comp.go")
+// Make sure that generated validation code from test .v file builds
+// without error.
+func testBuildGood(t *testing.T, dstname, srcname string) {
 	output, err := testBuild(t, dstname, srcname, nil)
 	if err != nil {
 		t.Errorf("build failed: %v, %s", err, output)
+	}
+}
+
+// Make sure that generated validation code from good test .v files
+// builds without error.
+func TestBuildGood(t *testing.T) {
+	for _, name := range goodnames {
+		dstname := path.Join("test", fmt.Sprintf("%s.go", name))
+		srcname := path.Join("test", fmt.Sprintf("%s.v", name))
+		testBuildGood(t, dstname, srcname)
 	}
 }
 

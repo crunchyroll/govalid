@@ -14,9 +14,6 @@ fuzz testing of random input programs based off of the
 Future Work
 -----------
  - Add more types to validate:
-    - `*url.URL`
-    - `*mail.Address`
- - Add more types to validate:
     - Bounded strings
     - Bounded numbers
  - Optional fields.

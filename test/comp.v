@@ -4,8 +4,12 @@ package foo
 // imports.
 import "log"
 import (
+	"bytes"
 	"fmt"
 	"strings"
+
+	"net/mail"
+	"net/url"
 )
 
 func init() {
@@ -34,7 +38,10 @@ type fooTypeSet struct {
 	u32 uint32
 	u64 uint64
 
-  // No rune or byte.
+	addr *mail.Address
+	homepage *url.URL
+
+	// No rune or byte.
 }
 
 type PublicStruct struct {
@@ -44,4 +51,6 @@ type PublicStruct struct {
 type mixed struct {
 	x int
 	bad1 fooTypeSet
+	buf *bytes.Buffer
+	addr *mail.Address
 }
