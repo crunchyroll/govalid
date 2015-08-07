@@ -30,5 +30,5 @@ func TestProcess(t *testing.T) {
 	srcname := path.Join("test", "comp.v")
 	dstname := path.Join("test", "comp.go")
 	testProcess(t, srcname, dstname)
-	os.Remove(dstname)
+	defer os.Remove(dstname)
 }
