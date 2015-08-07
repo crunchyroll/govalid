@@ -105,6 +105,9 @@
 //	*mail.Address
 //	*url.URL
 //
+// Note that you will be responsible for importing net/mail or net/url
+// in your .v file yourself.
+//
 // Integer Bases
 //
 // The generated validation code for ints and uints uses a base of 0,

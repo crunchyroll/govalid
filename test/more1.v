@@ -1,8 +1,5 @@
 // Test .v for adding *url.URL and *mail.Address support.
 
-// TODO Come up with reasonable functionality (or document) when you are
-// missing the url or mail imports.
-
 package whatever
 
 import (
