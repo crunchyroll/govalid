@@ -51,8 +51,7 @@ func testFmt(t *testing.T, dstname, srcname string) {
 	cmd = exec.Command("diff", "-u", dstname, dstname2)
 	output, err = cmd.CombinedOutput()
 	if err != nil {
-		t.Errorf("gofmt output differs; %v\n", err)
-		t.Logf("%s\n", output)
+		t.Errorf("gofmt output differs; %v\n%s\n", err, output)
 	}
 }
 
