@@ -6,4 +6,5 @@ package main
 var goodnames = []string{
 	"comp",  // Comprehensive test file.
 	"more1", // Test file for first round of more types.
+	"empty", // structs that generate no validator code.
 }

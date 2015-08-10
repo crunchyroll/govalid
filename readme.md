@@ -13,10 +13,8 @@ Run `go test` to test.  You may want to run `go test -short` to avoid
 
 Future Work
 -----------
- - Add more types to validate:
-    - Bounded strings
-    - Bounded numbers
- - Optional fields.
+ - Document def, max, min.
+ - Document that the generation of bad code no longer happens.
  - Nicer error reporting.  Ideally, the validation library would give
    you an error object from which you could easily generate a
    human-readable string indicating all of the bad fields passed in and
