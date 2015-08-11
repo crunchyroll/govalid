@@ -3,24 +3,19 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"reflect"
 	"strconv"
 	"strings"
-
-	"math/big"
 )
-
-var errBadLength = errors.New("negative length")
-var errBadBounds = errors.New("minimum length > maximum length")
-var errTooBig    = errors.New("number too big for length (int)")
 
 var maxInt = int((^uint(0)) >> 1)
 
 type fieldMetadata struct {
-	max *big.Int // Maximum value or length.
-	min *big.Int // Minimum value or length.
+	// Maximum and minimum value or length.  If the empty string,
+	// there is no max/min.
+	max string
+	min string
 
 	// Default value; if non-nil, the field is optional.  If empty,
 	// the default value is the zero value of the field type.  If
@@ -54,12 +49,10 @@ func parseFieldMetadata(tag string) *fieldMetadata {
 				log.Printf("warning: unexpected field tag item %q\n", kv[0])
 			}
 		} else if len(kv) == 2 {
-			if kv[0] == "min" {
-				meta.min = new(big.Int)
-				meta.min.SetString(kv[1], 0)
-			} else if kv[0] == "max" {
-				meta.max = new(big.Int)
-				meta.max.SetString(kv[1], 0)
+			if kv[0] == "max" {
+				meta.max = kv[1]
+			} else if kv[0] == "min" {
+				meta.min = kv[1]
 			} else if kv[0] == "def" {
 				meta.def = &kv[1]
 			} else {
@@ -74,51 +67,4 @@ func parseFieldMetadata(tag string) *fieldMetadata {
 		}
 	}
 	return meta
-}
-
-// ensureFitsInt evaluates whether the given *big.Int can fit into an
-// int type.  If not, it returns a relevant error.  If so, it returns
-// nil.
-func ensureFitsInt(b *big.Int) error {
-	if b.Cmp(big.NewInt(int64(maxInt))) == 1 {
-		return errTooBig
-	}
-	return nil
-}
-
-// checkFieldMetadata makes sure that the max and min values contained
-// in the given metadata are reasonable given that they'll be used for
-// measuring lengths.  It returns nil if so, and an error if not.
-func checkFieldMetadata(meta *fieldMetadata) error {
-	if meta.max != nil {
-		if err := ensureFitsInt(meta.max); err != nil {
-			return err
-		}
-		cmp := meta.max.Cmp(big.NewInt(0))
-		if cmp == -1 {
-			// TODO Track line/character where the offense
-			// occurred.
-			return errBadLength
-		}
-	}
-	if meta.min != nil {
-		if err := ensureFitsInt(meta.min); err != nil {
-			return err
-		}
-		cmp := meta.min.Cmp(big.NewInt(0))
-		if cmp == -1 {
-			// TODO Track line/character where the offense
-			// occurred.
-			return errBadLength
-		}
-	}
-	if meta.max != nil && meta.min != nil {
-		cmp := meta.max.Cmp(meta.min)
-		if cmp == -1 {
-			// TODO Track line/character where the offense
-			// occurred.
-			return errBadBounds
-		}
-	}
-	return nil
 }

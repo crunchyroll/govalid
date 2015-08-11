@@ -13,46 +13,58 @@ import (
 )
 
 // validateString writes validator code for a string.
-func validateString(ctx *generationContext, fieldname string, meta *fieldMetadata) error {
-	if meta.max != nil {
+func validateString(ctx *generationContext, fieldname string, meta *fieldMetadata) {
+	if meta.max != "" {
+		ctx.addImport("errors")
 		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
 		ctx.write("\t\treturn errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t}\n")
 	}
-	if meta.min != nil {
+	if meta.min != "" {
+		ctx.addImport("errors")
 		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
 		ctx.write("\t\treturn errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t}\n")
 	}
 	ctx.write("\tret.%s = data[\"%s\"]\n", fieldname, fieldname)
-
-	return nil
 }
 
 // validateBool writes validator code for a bool.
-func validateBool(ctx *generationContext, fieldname string, meta *fieldMetadata) error {
+func validateBool(ctx *generationContext, fieldname string, meta *fieldMetadata) {
 	ctx.addVariable("err", "error")
 
 	ctx.write("\tret.%s, err = strconv.ParseBool(data[\"%s\"])\n", fieldname, fieldname)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
-
-	return nil
 }
 
 // It would be nice if we didn't have as much duplication of generated
 // code between the numeric validators.
 
 // validateUint writes validator code for a uint of the given bitSize.
-func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) error {
+func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
 	ctx.addVariable("err", "error")
+	ctx.addVariable(fmt.Sprintf("%stmp", fieldname), "uint64")
 
-	ctx.write("\tvar %stmp uint64\n", fieldname)
 	ctx.write("\t%stmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fieldname, fieldname, bitSize)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
+
+	if meta.max != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif %stmp > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t}\n")
+	}
+	if meta.min != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif %stmp < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t}\n")
+	}
+
 	// Have to cast since ParseUint returns a uint64.
 	if bitSize == 0 {
 		ctx.write("\tret.%s = uint(%stmp)\n", fieldname, fieldname)
@@ -61,19 +73,31 @@ func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata,
 	} else {
 		ctx.write("\tret.%s = %stmp\n", fieldname, fieldname)
 	}
-
-	return nil
 }
 
 // validateInt writes validator code for an int of the given bitSize.
-func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) error {
+func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
 	ctx.addVariable("err", "error")
+	ctx.addVariable(fmt.Sprintf("%stmp", fieldname), "int64")
 
-	ctx.write("\tvar %stmp int64\n", fieldname)
 	ctx.write("\t%stmp, err = strconv.ParseInt(data[\"%s\"], 0, %d)\n", fieldname, fieldname, bitSize)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
+
+	if meta.max != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif %stmp > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t}\n")
+	}
+	if meta.min != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif %stmp < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t}\n")
+	}
+
 	// Have to cast since ParseInt returns an int64.
 	if bitSize == 0 {
 		ctx.write("\tret.%s = int(%stmp)\n", fieldname, fieldname)
@@ -82,105 +106,132 @@ func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, 
 	} else {
 		ctx.write("\tret.%s = %stmp\n", fieldname, fieldname)
 	}
-
-	return nil
 }
 
 // validateFloat writes validator code for a float of the given bitSize.
-func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) error {
+func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
 	ctx.addVariable("err", "error")
+	ctx.addVariable(fmt.Sprintf("%stmp", fieldname), "float64")
 
-	ctx.write("\tvar %stmp float64\n", fieldname)
 	ctx.write("\t%stmp, err = strconv.ParseFloat(data[\"%s\"], %d)\n", fieldname, fieldname, bitSize)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
+
+	if meta.max != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif %stmp > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t}\n")
+	}
+	if meta.min != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif %stmp < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t}\n")
+	}
+
 	// Have to cast since ParseFloat returns a float64.  Superfluous
 	// if bitSize is 64, but whatever.
 	ctx.write("\tret.%s = float%d(%stmp)\n", fieldname, bitSize, fieldname)
-
-	return nil
 }
 
 // validateSimpleType delegates validator code generation given the name
 // of the type.
-func validateSimpleType(ctx *generationContext, fieldname string, typename string, meta *fieldMetadata) error {
+func validateSimpleType(ctx *generationContext, fieldname string, typename string, meta *fieldMetadata) {
 	switch typename {
 	case "string":
-		if err := checkFieldMetadata(meta); err != nil {
-			return err
-		}
-		return validateString(ctx, fieldname, meta)
+		validateString(ctx, fieldname, meta)
 
 	case "bool":
 		ctx.addImport("strconv")
-		return validateBool(ctx, fieldname, meta)
+		validateBool(ctx, fieldname, meta)
 
 	case "uint":
 		ctx.addImport("strconv")
-		return validateUint(ctx, fieldname, meta, 0)
+		validateUint(ctx, fieldname, meta, 0)
 	case "uint8":
 		ctx.addImport("strconv")
-		return validateUint(ctx, fieldname, meta, 8)
+		validateUint(ctx, fieldname, meta, 8)
 	case "uint16":
 		ctx.addImport("strconv")
-		return validateUint(ctx, fieldname, meta, 16)
+		validateUint(ctx, fieldname, meta, 16)
 	case "uint32":
 		ctx.addImport("strconv")
-		return validateUint(ctx, fieldname, meta, 32)
+		validateUint(ctx, fieldname, meta, 32)
 	case "uint64":
 		ctx.addImport("strconv")
-		return validateUint(ctx, fieldname, meta, 64)
+		validateUint(ctx, fieldname, meta, 64)
 
 	case "int":
 		ctx.addImport("strconv")
-		return validateInt(ctx, fieldname, meta, 0)
+		validateInt(ctx, fieldname, meta, 0)
 	case "int8":
 		ctx.addImport("strconv")
-		return validateInt(ctx, fieldname, meta, 8)
+		validateInt(ctx, fieldname, meta, 8)
 	case "int16":
 		ctx.addImport("strconv")
-		return validateInt(ctx, fieldname, meta, 16)
+		validateInt(ctx, fieldname, meta, 16)
 	case "int32":
 		ctx.addImport("strconv")
-		return validateInt(ctx, fieldname, meta, 32)
+		validateInt(ctx, fieldname, meta, 32)
 	case "int64":
 		ctx.addImport("strconv")
-		return validateInt(ctx, fieldname, meta, 64)
+		validateInt(ctx, fieldname, meta, 64)
 
 	case "float32":
 		ctx.addImport("strconv")
-		return validateFloat(ctx, fieldname, meta, 32)
+		validateFloat(ctx, fieldname, meta, 32)
 	case "float64":
 		ctx.addImport("strconv")
-		return validateFloat(ctx, fieldname, meta, 64)
+		validateFloat(ctx, fieldname, meta, 64)
 	}
-
-	return nil
 }
 
 // validateUrl writes validator code for a *mail.Address.
-func validateMailAddress(ctx *generationContext, fieldname string, meta *fieldMetadata) error {
+func validateMailAddress(ctx *generationContext, fieldname string, meta *fieldMetadata) {
 	ctx.addVariable("err", "error")
+
+	if meta.max != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t}\n")
+	}
+	if meta.min != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t}\n")
+	}
 
 	ctx.write("\tret.%s, err = mail.ParseAddress(data[\"%s\"])\n", fieldname, fieldname)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
-
-	return nil
 }
 
 // validateUrl writes validator code for a *url.URL.
-func validateUrl(ctx *generationContext, fieldname string, meta *fieldMetadata) error {
+func validateUrl(ctx *generationContext, fieldname string, meta *fieldMetadata) {
 	ctx.addVariable("err", "error")
+
+	if meta.max != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t}\n")
+	}
+	if meta.min != "" {
+		ctx.addImport("errors")
+		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t}\n")
+	}
 
 	ctx.write("\tret.%s, err = url.Parse(data[\"%s\"])\n", fieldname, fieldname)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
-
-	return nil
 }
 
 func makeFunctionName(structname string) string {
@@ -192,7 +243,7 @@ func makeFunctionName(structname string) string {
 	return fmt.Sprintf("validate%s", strings.Title(structname))
 }
 
-func validatorImpl(ctx *generationContext, structtype *ast.StructType) error {
+func validatorImpl(ctx *generationContext, structtype *ast.StructType) {
 	for _, field := range structtype.Fields.List {
 		fieldname := field.Names[0].Name
 
@@ -211,9 +262,7 @@ func validatorImpl(ctx *generationContext, structtype *ast.StructType) error {
 			ident := field.Type.(*ast.Ident)
 			typename := ident.Name
 			ctx.write("\n\t// %s %s\n", fieldname, typename)
-			if err := validateSimpleType(ctx, fieldname, typename, meta); err != nil {
-				return err
-			}
+			validateSimpleType(ctx, fieldname, typename, meta)
 
 		// We'll look for a pointer type.
 		case *ast.StarExpr:
@@ -228,42 +277,28 @@ func validatorImpl(ctx *generationContext, structtype *ast.StructType) error {
 			}
 			pkgname := pkg.Name
 			typename := sel.Sel.Name
-			ctx.write("\t// %s *%s.%s\n", fieldname, pkgname, typename)
+			ctx.write("\n\t// %s *%s.%s\n", fieldname, pkgname, typename)
 			if pkgname == "mail" && typename == "Address" {
-				if err := checkFieldMetadata(meta); err != nil {
-					return err
-				}
-				if err := validateMailAddress(ctx, fieldname, meta); err != nil {
-					return err
-				}
+				validateMailAddress(ctx, fieldname, meta)
 			} else if pkgname == "url" && typename == "URL" {
-				if err := checkFieldMetadata(meta); err != nil {
-					return err
-				}
-				if err := validateUrl(ctx, fieldname, meta); err != nil {
-					return err
-				}
+				validateUrl(ctx, fieldname, meta)
 			}
 		}
 	}
-
-	return nil
 }
 
 // validator writes validator code for the given struct.  It iterates
 // through the struct fields, and for those for which it can generate
 // validator code, it does so.  It returns whether or not the strconv
 // package is needed by the generated code.
-func validator(ctx *generationContext, structname string, structtype *ast.StructType) error {
+func validator(ctx *generationContext, structname string, structtype *ast.StructType) {
 	// First, buffer inner contents of the function into a secondary
 	// context.  This is so we can know what variables we'll need to
 	// declare at the top of the function.
 	ctx2 := newContext()
 
 	// Generate the inner implementation of the validator function.
-	if err := validatorImpl(ctx2, structtype); err != nil {
-		return err
-	}
+	validatorImpl(ctx2, structtype)
 
 	// Now that that's succeeded, we can actually output all of the
 	// code.
@@ -288,10 +323,10 @@ func validator(ctx *generationContext, structname string, structtype *ast.Struct
 		ctx.write("\tvar %s %s\n", x.name, x.typeExpr)
 	}
 
-	// Copy over the inner implementation body itself.
-	if _, err := ctx.Buffer.ReadFrom(ctx2.Buffer); err != nil {
-		return err
-	}
+	// Copy over the inner implementation body itself.  Because
+	// we're reading from a buffer, there's no actual error to
+	// handle here.
+	ctx.Buffer.ReadFrom(ctx2.Buffer)
 
 	ctx.write("\n")
 	ctx.write("\treturn ret, nil\n")
@@ -302,6 +337,4 @@ func validator(ctx *generationContext, structname string, structtype *ast.Struct
 	for _, importName := range ctx2.getImports() {
 		ctx.addImport(importName)
 	}
-
-	return nil
 }
