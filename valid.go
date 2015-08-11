@@ -324,6 +324,29 @@ func validatorImpl(ctx *generationContext, structtype *ast.StructType) {
 	}
 }
 
+func declareVariables(ctx *generationContext, vars []variableType) {
+	if len(vars) == 0 {
+		return
+	}
+
+	// Compute maximum length of variable names so we can do
+	// gofmt-compatible alignment.
+	max := 0
+	for _, x := range vars {
+		if len(x.name) > max {
+			max = len(x.name)
+		}
+	}
+
+	ctx.write("\tvar (\n")
+	for _, x := range vars {
+		nspaces := max - len(x.name) + 1
+		spaces := strings.Repeat(" ", nspaces)
+		ctx.write("\t\t%s%s%s\n", x.name, spaces, x.typeExpr)
+	}
+	ctx.write("\t)\n")
+}
+
 // validator writes validator code for the given struct.  It iterates
 // through the struct fields, and for those for which it can generate
 // validator code, it does so.  It returns whether or not the strconv
@@ -356,9 +379,7 @@ func validator(ctx *generationContext, structname string, structtype *ast.Struct
 	ctx.write("\tret := new(%s)\n", structname)
 
 	// Delcare variables needed by the implementation.
-	for _, x := range ctx2.getVariables() {
-		ctx.write("\tvar %s %s\n", x.name, x.typeExpr)
-	}
+	declareVariables(ctx, ctx2.getVariables())
 
 	// Copy over the inner implementation body itself.  Because
 	// we're reading from a buffer, there's no actual error to
