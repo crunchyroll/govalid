@@ -14,6 +14,9 @@ import (
 
 var errBadLength = errors.New("negative length")
 var errBadBounds = errors.New("minimum length > maximum length")
+var errTooBig    = errors.New("number too big for length (int)")
+
+var maxInt = int((^uint(0)) >> 1)
 
 type fieldMetadata struct {
 	max *big.Int // Maximum value or length.
@@ -73,12 +76,24 @@ func parseFieldMetadata(tag string) *fieldMetadata {
 	return meta
 }
 
+// ensureFitsInt evaluates whether the given *big.Int can fit into an
+// int type.  If not, it returns a relevant error.  If so, it returns
+// nil.
+func ensureFitsInt(b *big.Int) error {
+	if b.Cmp(big.NewInt(int64(maxInt))) == 1 {
+		return errTooBig
+	}
+	return nil
+}
+
 // checkFieldMetadata makes sure that the max and min values contained
 // in the given metadata are reasonable given that they'll be used for
 // measuring lengths.  It returns nil if so, and an error if not.
 func checkFieldMetadata(meta *fieldMetadata) error {
-	// TODO Make sure these fit into ints (since len(x) is an int).
 	if meta.max != nil {
+		if err := ensureFitsInt(meta.max); err != nil {
+			return err
+		}
 		cmp := meta.max.Cmp(big.NewInt(0))
 		if cmp == -1 {
 			// TODO Track line/character where the offense
@@ -87,7 +102,10 @@ func checkFieldMetadata(meta *fieldMetadata) error {
 		}
 	}
 	if meta.min != nil {
-		cmp := meta.max.Cmp(big.NewInt(0))
+		if err := ensureFitsInt(meta.min); err != nil {
+			return err
+		}
+		cmp := meta.min.Cmp(big.NewInt(0))
 		if cmp == -1 {
 			// TODO Track line/character where the offense
 			// occurred.

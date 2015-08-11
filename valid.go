@@ -14,6 +14,16 @@ import (
 
 // validateString writes validator code for a string.
 func validateString(ctx *generationContext, fieldname string, meta *fieldMetadata) error {
+	if meta.max != nil {
+		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t}\n")
+	}
+	if meta.min != nil {
+		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t}\n")
+	}
 	ctx.write("\tret.%s = data[\"%s\"]\n", fieldname, fieldname)
 
 	return nil
@@ -200,7 +210,7 @@ func validatorImpl(ctx *generationContext, structtype *ast.StructType) error {
 		case *ast.Ident:
 			ident := field.Type.(*ast.Ident)
 			typename := ident.Name
-			ctx.write("\t// %s %s\n", fieldname, typename)
+			ctx.write("\n\t// %s %s\n", fieldname, typename)
 			if err := validateSimpleType(ctx, fieldname, typename, meta); err != nil {
 				return err
 			}
