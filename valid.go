@@ -14,26 +14,42 @@ import (
 
 // validateString writes validator code for a string.
 func validateString(ctx *generationContext, fieldname string, meta *fieldMetadata) {
+	ctx.addImport("errors")
+	ctx.addVariable(fmt.Sprintf("field_%stmp", fieldname), "string")
+	ctx.addVariable("ok", "bool")
+
+	ctx.write("\tfield_%stmp, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif !ok {\n")
+	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	ctx.write("\t}\n")
+
 	if meta.max != "" {
-		ctx.addImport("errors")
 		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t}\n")
 	}
 	if meta.min != "" {
-		ctx.addImport("errors")
 		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t}\n")
 	}
-	ctx.write("\tret.%s = data[\"%s\"]\n", fieldname, fieldname)
+
+	ctx.write("\tret.%s = field_%stmp\n", fieldname, fieldname)
 }
 
 // validateBool writes validator code for a bool.
 func validateBool(ctx *generationContext, fieldname string, meta *fieldMetadata) {
+	ctx.addImport("errors")
+	ctx.addVariable(fmt.Sprintf("field_%stmpstr", fieldname), "string")
+	ctx.addVariable("ok", "bool")
 	ctx.addVariable("err", "error")
 
-	ctx.write("\tret.%s, err = strconv.ParseBool(data[\"%s\"])\n", fieldname, fieldname)
+	ctx.write("\tfield_%stmpstr, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif !ok {\n")
+	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	ctx.write("\t}\n")
+
+	ctx.write("\tret.%s, err = strconv.ParseBool(field_%stmpstr)\n", fieldname, fieldname)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
@@ -44,96 +60,117 @@ func validateBool(ctx *generationContext, fieldname string, meta *fieldMetadata)
 
 // validateUint writes validator code for a uint of the given bitSize.
 func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
+	ctx.addVariable(fmt.Sprintf("field_%stmpstr", fieldname), "string")
+	ctx.addVariable("ok", "bool")
+	ctx.addVariable(fmt.Sprintf("field_%stmp", fieldname), "uint64")
 	ctx.addVariable("err", "error")
-	ctx.addVariable(fmt.Sprintf("%stmp", fieldname), "uint64")
 
-	ctx.write("\t%stmp, err = strconv.ParseUint(data[\"%s\"], 0, %d)\n", fieldname, fieldname, bitSize)
+	ctx.write("\tfield_%stmpstr, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif !ok {\n")
+	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	ctx.write("\t}\n")
+
+	ctx.write("\tfield_%stmp, err = strconv.ParseUint(field_%stmpstr, 0, %d)\n", fieldname, fieldname, bitSize)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif %stmp > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\tif field_%stmp > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif %stmp < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\tif field_%stmp < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t}\n")
 	}
 
 	// Have to cast since ParseUint returns a uint64.
 	if bitSize == 0 {
-		ctx.write("\tret.%s = uint(%stmp)\n", fieldname, fieldname)
+		ctx.write("\tret.%s = uint(field_%stmp)\n", fieldname, fieldname)
 	} else if bitSize != 64 {
-		ctx.write("\tret.%s = uint%d(%stmp)\n", fieldname, bitSize, fieldname)
+		ctx.write("\tret.%s = uint%d(field_%stmp)\n", fieldname, bitSize, fieldname)
 	} else {
-		ctx.write("\tret.%s = %stmp\n", fieldname, fieldname)
+		ctx.write("\tret.%s = field_%stmp\n", fieldname, fieldname)
 	}
 }
 
 // validateInt writes validator code for an int of the given bitSize.
 func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
+	ctx.addVariable(fmt.Sprintf("field_%stmpstr", fieldname), "string")
+	ctx.addVariable("ok", "bool")
+	ctx.addVariable(fmt.Sprintf("field_%stmp", fieldname), "int64")
 	ctx.addVariable("err", "error")
-	ctx.addVariable(fmt.Sprintf("%stmp", fieldname), "int64")
 
-	ctx.write("\t%stmp, err = strconv.ParseInt(data[\"%s\"], 0, %d)\n", fieldname, fieldname, bitSize)
+	ctx.write("\tfield_%stmpstr, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif !ok {\n")
+	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	ctx.write("\t}\n")
+
+	ctx.write("\tfield_%stmp, err = strconv.ParseInt(field_%stmpstr, 0, %d)\n", fieldname, fieldname, bitSize)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif %stmp > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\tif field_%stmp > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif %stmp < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\tif field_%stmp < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t}\n")
 	}
 
 	// Have to cast since ParseInt returns an int64.
 	if bitSize == 0 {
-		ctx.write("\tret.%s = int(%stmp)\n", fieldname, fieldname)
+		ctx.write("\tret.%s = int(field_%stmp)\n", fieldname, fieldname)
 	} else if bitSize != 64 {
-		ctx.write("\tret.%s = int%d(%stmp)\n", fieldname, bitSize, fieldname)
+		ctx.write("\tret.%s = int%d(field_%stmp)\n", fieldname, bitSize, fieldname)
 	} else {
-		ctx.write("\tret.%s = %stmp\n", fieldname, fieldname)
+		ctx.write("\tret.%s = field_%stmp\n", fieldname, fieldname)
 	}
 }
 
 // validateFloat writes validator code for a float of the given bitSize.
 func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
+	ctx.addVariable(fmt.Sprintf("field_%stmpstr", fieldname), "string")
+	ctx.addVariable("ok", "bool")
+	ctx.addVariable(fmt.Sprintf("field_%stmp", fieldname), "float64")
 	ctx.addVariable("err", "error")
-	ctx.addVariable(fmt.Sprintf("%stmp", fieldname), "float64")
 
-	ctx.write("\t%stmp, err = strconv.ParseFloat(data[\"%s\"], %d)\n", fieldname, fieldname, bitSize)
+	ctx.write("\tfield_%stmpstr, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif !ok {\n")
+	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	ctx.write("\t}\n")
+
+	ctx.write("\tfield_%stmp, err = strconv.ParseFloat(field_%stmpstr, %d)\n", fieldname, fieldname, bitSize)
 	ctx.write("\tif err != nil {\n")
 	ctx.write("\t\treturn nil, err\n")
 	ctx.write("\t}\n")
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif %stmp > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\tif field_%stmp > %s {\n", fieldname, meta.max)
+		ctx.write("\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif %stmp < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\tif field_%stmp < %s {\n", fieldname, meta.min)
+		ctx.write("\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t}\n")
 	}
 
 	// Have to cast since ParseFloat returns a float64.  Superfluous
 	// if bitSize is 64, but whatever.
-	ctx.write("\tret.%s = float%d(%stmp)\n", fieldname, bitSize, fieldname)
+	ctx.write("\tret.%s = float%d(field_%stmp)\n", fieldname, bitSize, fieldname)
 }
 
 // validateSimpleType delegates validator code generation given the name
@@ -195,13 +232,13 @@ func validateMailAddress(ctx *generationContext, fieldname string, meta *fieldMe
 	if meta.max != "" {
 		ctx.addImport("errors")
 		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
 		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t}\n")
 	}
 
@@ -218,13 +255,13 @@ func validateUrl(ctx *generationContext, fieldname string, meta *fieldMetadata) 
 	if meta.max != "" {
 		ctx.addImport("errors")
 		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
 		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t}\n")
 	}
 
