@@ -12,8 +12,34 @@ import (
 	"unicode/utf8"
 )
 
-// It would be nice if we didn't have as much duplication of generated
-// code between the validators.
+type validateGenericInput struct {
+	fieldname   string
+	itypeexpr   string
+	typeexpr    string
+	parser      string
+	checkbounds bool
+	uselength   bool
+	meta        *fieldMetadata
+}
+
+func validateGeneric(ctx *generationContext, i *validateGenericInput) {
+	ctx.addVariable(fmt.Sprintf("field_%s_s", i.fieldname), "string")
+	ctx.addVariable("ok", "bool")
+	ctx.addVariable(fmt.Sprintf("field_%s", i.fieldname), i.itypeexpr)
+
+	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", i.fieldname, i.fieldname)
+	ctx.write("\tif ok {\n")
+
+	if i.parser != "" {
+		ctx.addVariable("err", "error")
+		ctx.write("\t\tfield_%s, err = %s(field_%s_s)\n", fieldname, parser, fieldname)
+		ctx.write("\t\tif err != nil {\n")
+		ctx.write("\t\t\treturn nil, err\n")
+		ctx.write("\t\t}\n")
+	} else {
+		ctx.write("\t\tfield_%s = field_%s_s\n", fieldname, fieldname)
+	}
+}
 
 // validateString writes validator code for a string.
 func validateString(ctx *generationContext, fieldname string, meta *fieldMetadata) {
