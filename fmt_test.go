@@ -86,7 +86,7 @@ func testFmt(t *testing.T, srcname string, src io.Reader) {
 }
 
 func TestFmt(t *testing.T) {
-	for _, name := range goodnames {
+	for _, name := range testGoodNames {
 		srcname := path.Join("test", fmt.Sprintf("%s.v", name))
 		testFmt(t, srcname, nil)
 	}

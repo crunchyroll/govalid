@@ -36,7 +36,7 @@ func testBuildGood(t *testing.T, dstname, srcname string) {
 // Make sure that generated validation code from good test .v files
 // builds without error.
 func TestBuildGood(t *testing.T) {
-	for _, name := range goodnames {
+	for _, name := range testGoodNames {
 		dstname := path.Join("test", fmt.Sprintf("%s.go", name))
 		srcname := path.Join("test", fmt.Sprintf("%s.v", name))
 		testBuildGood(t, dstname, srcname)

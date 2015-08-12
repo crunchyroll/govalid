@@ -40,7 +40,7 @@ func testProcess(t *testing.T, dstname string, dst io.Writer, srcname string, sr
 }
 
 func TestProcess(t *testing.T) {
-	for _, name := range goodnames {
+	for _, name := range testGoodNames {
 		dstname := path.Join("test", fmt.Sprintf("%s.go", name))
 		srcname := path.Join("test", fmt.Sprintf("%s.v", name))
 		testProcess(t, dstname, nil, srcname, nil)
