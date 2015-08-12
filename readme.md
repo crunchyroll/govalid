@@ -27,4 +27,9 @@ Future Work
  - Don't generate bad code if there are no validatable fields?
    Currently generates an unused `var err error`.
 
+Bugs
+----
+ - Users cannot add more types to validate as they develop without
+   modifying this library.
+
 [1]: https://en.wikipedia.org/wiki/Fuzz_testing
