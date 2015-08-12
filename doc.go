@@ -266,11 +266,4 @@
 //	func ValidateJobInput(data map[string]string) (*jobInput, error) {
 //		...
 //
-// Error Conditions
-//
-// If an input structure contains no validatable fields, then the
-// generated code will declare an unused err variable, which will cause
-// a compile error.  This is currently considered a feature, although
-// future use cases may require a more general handling of such
-// ill-advised inputs to avoid generating bad code.
 package main
