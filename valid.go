@@ -97,7 +97,7 @@ func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata,
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
+		ctx.write("\t\tif field_%s > %s {\n", fieldname, meta.max)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t\t}\n")
 	}
@@ -150,7 +150,7 @@ func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, 
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
+		ctx.write("\t\tif field_%s > %s {\n", fieldname, meta.max)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t\t}\n")
 	}
@@ -203,7 +203,7 @@ func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
+		ctx.write("\t\tif field_%s > %s {\n", fieldname, meta.max)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t\t}\n")
 	}
