@@ -14,6 +14,7 @@ import (
 
 // testBuild handles cleaning up the destination file.
 func testBuild(t *testing.T, dstname, srcname string, src io.Reader) ([]byte, error) {
+	t.Logf("building from %s\n", srcname)
 	testProcess(t, dstname, nil, srcname, src)
 	defer os.Remove(dstname)
 
