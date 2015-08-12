@@ -294,47 +294,87 @@ func validateSimpleType(ctx *generationContext, fieldname string, typename strin
 
 // validateUrl writes validator code for a *mail.Address.
 func validateMailAddress(ctx *generationContext, fieldname string, meta *fieldMetadata) {
+	ctx.addVariable(fmt.Sprintf("field_%s_s", fieldname), "string")
+	ctx.addVariable("ok", "bool")
 	ctx.addVariable("err", "error")
+
+	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif ok {\n")
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\t}\n")
 	}
 
-	ctx.write("\tret.%s, err = mail.ParseAddress(data[\"%s\"])\n", fieldname, fieldname)
-	ctx.write("\tif err != nil {\n")
-	ctx.write("\t\treturn nil, err\n")
+	ctx.write("\t\tret.%s, err = mail.ParseAddress(field_%s_s)\n", fieldname, fieldname)
+	ctx.write("\t\tif err != nil {\n")
+	ctx.write("\t\t\treturn nil, err\n")
+	ctx.write("\t\t}\n")
+	ctx.write("\t} else {\n")
+
+	if meta.def != nil {
+		ctx.write("\t\t// %s is optional.\n", fieldname)
+		if *meta.def == "" {
+			ctx.write("\t\t// Zero value already set.\n")
+		} else {
+			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
+		}
+	} else {
+		ctx.addImport("errors")
+		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	}
+
 	ctx.write("\t}\n")
 }
 
 // validateUrl writes validator code for a *url.URL.
 func validateUrl(ctx *generationContext, fieldname string, meta *fieldMetadata) {
+	ctx.addVariable(fmt.Sprintf("field_%s_s", fieldname), "string")
+	ctx.addVariable("ok", "bool")
 	ctx.addVariable("err", "error")
+
+	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif ok {\n")
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
-		ctx.write("\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\t}\n")
 	}
 
-	ctx.write("\tret.%s, err = url.Parse(data[\"%s\"])\n", fieldname, fieldname)
-	ctx.write("\tif err != nil {\n")
-	ctx.write("\t\treturn nil, err\n")
+	ctx.write("\t\tret.%s, err = url.Parse(field_%s_s)\n", fieldname, fieldname)
+	ctx.write("\t\tif err != nil {\n")
+	ctx.write("\t\t\treturn nil, err\n")
+	ctx.write("\t\t}\n")
+	ctx.write("\t} else {\n")
+
+	if meta.def != nil {
+		ctx.write("\t\t// %s is optional.\n", fieldname)
+		if *meta.def == "" {
+			ctx.write("\t\t// Zero value already set.\n")
+		} else {
+			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
+		}
+	} else {
+		ctx.addImport("errors")
+		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	}
+
 	ctx.write("\t}\n")
 }
 
