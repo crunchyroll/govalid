@@ -232,6 +232,24 @@
 // strconv.ParseInt or strconv.ParseUint functions.  For example, a
 // hexadecimal value would be parsed by passing in "0xbeef" or "48879".
 //
+// Tags
+//
+// You may tag your struct fields to activate extra validation logic.
+// Use the tag key "valid".  Three tags are supported.
+//
+//	def[:value]
+//	max:m
+//	min:n
+//
+// If "def" is unaccompanied by a value, the field is optional, and the
+// default is the zero value given by the field's type.  If provided,
+// it is injected directly into the generated code.  max and min do not
+// apply to bools.  On numeric types, max and min can be used to bound
+// the value.  Like the default value, the bounds you specify in the tag
+// will be injected directly into the generated code.  For strings, URLs
+// and email addresses, the bounds apply to the length of the input data
+// string.
+//
 // Export
 //
 // If your structure name indicates it is to be (un)exported, then the
