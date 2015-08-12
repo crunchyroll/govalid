@@ -17,8 +17,6 @@ import (
 
 // validateString writes validator code for a string.
 func validateString(ctx *generationContext, fieldname string, meta *fieldMetadata) {
-	ctx.addImport("errors")
-
 	ctx.addVariable(fmt.Sprintf("field_%s", fieldname), "string")
 	ctx.addVariable("ok", "bool")
 
@@ -27,11 +25,13 @@ func validateString(ctx *generationContext, fieldname string, meta *fieldMetadat
 	if meta.max != "" || meta.min != "" {
 		ctx.write("\tif ok {\n")
 		if meta.max != "" {
+			ctx.addImport("errors")
 			ctx.write("\t\tif len(field_%s) > %s {\n", fieldname, meta.max)
 			ctx.write("\t\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
 			ctx.write("\t\t}\n")
 		}
 		if meta.min != "" {
+			ctx.addImport("errors")
 			ctx.write("\t\tif len(field_%s) < %s {\n", fieldname, meta.min)
 			ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
 			ctx.write("\t\t}\n")
@@ -49,6 +49,7 @@ func validateString(ctx *generationContext, fieldname string, meta *fieldMetadat
 			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
 		}
 	} else {
+		ctx.addImport("errors")
 		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
 	}
 	ctx.write("\t}\n")
@@ -56,8 +57,6 @@ func validateString(ctx *generationContext, fieldname string, meta *fieldMetadat
 
 // validateBool writes validator code for a bool.
 func validateBool(ctx *generationContext, fieldname string, meta *fieldMetadata) {
-	ctx.addImport("errors")
-
 	ctx.addVariable(fmt.Sprintf("field_%s_s", fieldname), "string")
 	ctx.addVariable("ok", "bool")
 	ctx.addVariable("err", "error")
@@ -78,6 +77,7 @@ func validateBool(ctx *generationContext, fieldname string, meta *fieldMetadata)
 			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
 		}
 	} else {
+		ctx.addImport("errors")
 		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
 	}
 	ctx.write("\t}\n")
@@ -85,8 +85,6 @@ func validateBool(ctx *generationContext, fieldname string, meta *fieldMetadata)
 
 // validateUint writes validator code for a uint of the given bitSize.
 func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
-	ctx.addImport("errors")
-
 	ctx.addVariable(fmt.Sprintf("field_%s_s", fieldname), "string")
 	ctx.addVariable("ok", "bool")
 	ctx.addVariable(fmt.Sprintf("field_%s", fieldname), "uint64")
@@ -100,11 +98,13 @@ func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata,
 	ctx.write("\t\t}\n")
 
 	if meta.max != "" {
+		ctx.addImport("errors")
 		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
+		ctx.addImport("errors")
 		ctx.write("\t\tif field_%s < %s {\n", fieldname, meta.min)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t\t}\n")
@@ -129,6 +129,7 @@ func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata,
 			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
 		}
 	} else {
+		ctx.addImport("errors")
 		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
 	}
 
@@ -137,8 +138,6 @@ func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata,
 
 // validateInt writes validator code for an int of the given bitSize.
 func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
-	ctx.addImport("errors")
-
 	ctx.addVariable(fmt.Sprintf("field_%s_s", fieldname), "string")
 	ctx.addVariable("ok", "bool")
 	ctx.addVariable(fmt.Sprintf("field_%s", fieldname), "int64")
@@ -152,11 +151,13 @@ func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, 
 	ctx.write("\t\t}\n")
 
 	if meta.max != "" {
+		ctx.addImport("errors")
 		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
+		ctx.addImport("errors")
 		ctx.write("\t\tif field_%s < %s {\n", fieldname, meta.min)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t\t}\n")
@@ -181,6 +182,7 @@ func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, 
 			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
 		}
 	} else {
+		ctx.addImport("errors")
 		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
 	}
 
@@ -189,8 +191,6 @@ func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, 
 
 // validateFloat writes validator code for a float of the given bitSize.
 func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
-	ctx.addImport("errors")
-
 	ctx.addVariable(fmt.Sprintf("field_%s_s", fieldname), "string")
 	ctx.addVariable("ok", "bool")
 	ctx.addVariable(fmt.Sprintf("field_%s", fieldname), "float64")
@@ -204,11 +204,13 @@ func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata
 	ctx.write("\t\t}\n")
 
 	if meta.max != "" {
+		ctx.addImport("errors")
 		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
+		ctx.addImport("errors")
 		ctx.write("\t\tif field_%s < %s {\n", fieldname, meta.min)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t\t}\n")
@@ -231,6 +233,7 @@ func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata
 			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
 		}
 	} else {
+		ctx.addImport("errors")
 		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
 	}
 
