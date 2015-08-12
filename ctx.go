@@ -9,7 +9,7 @@ import (
 
 type variableType struct {
 	name     string
-	typeExpr string
+	typeexpr string
 }
 
 type generationContext struct {
@@ -40,8 +40,8 @@ func (ctx *generationContext) addImport(name string) {
 	ctx.imports[name] = struct{}{}
 }
 
-func (ctx *generationContext) addVariable(name, typeExpr string) {
-	ctx.variables[name] = typeExpr
+func (ctx *generationContext) addVariable(name, typeexpr string) {
+	ctx.variables[name] = typeexpr
 }
 
 func (ctx *generationContext) getImports() []string {
@@ -54,8 +54,8 @@ func (ctx *generationContext) getImports() []string {
 
 func (ctx *generationContext) getVariables() []variableType {
 	r := make([]variableType, 0, 10)
-	for name, typeExpr := range ctx.variables {
-		r = append(r, variableType{name, typeExpr})
+	for name, typeexpr := range ctx.variables {
+		r = append(r, variableType{name, typeexpr})
 	}
 	return r
 }

@@ -449,7 +449,7 @@ func declareVariables(ctx *generationContext, vars []variableType) {
 	for _, x := range vars {
 		nspaces := max - len(x.name) + 1
 		spaces := strings.Repeat(" ", nspaces)
-		ctx.write("\t\t%s%s%s\n", x.name, spaces, x.typeExpr)
+		ctx.write("\t\t%s%s%s\n", x.name, spaces, x.typeexpr)
 	}
 	ctx.write("\t)\n")
 }
