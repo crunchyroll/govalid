@@ -12,6 +12,9 @@ import (
 	"unicode/utf8"
 )
 
+// It would be nice if we didn't have as much duplication of generated
+// code between the validators.
+
 // validateString writes validator code for a string.
 func validateString(ctx *generationContext, fieldname string, meta *fieldMetadata) {
 	ctx.addImport("errors")
@@ -33,6 +36,7 @@ func validateString(ctx *generationContext, fieldname string, meta *fieldMetadat
 			ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
 			ctx.write("\t\t}\n")
 		}
+		ctx.write("\t\tret.%s = field_%s\n", fieldname, fieldname)
 		ctx.write("\t} else {\n")
 	} else {
 		ctx.write("\tif !ok {\n")
@@ -42,14 +46,12 @@ func validateString(ctx *generationContext, fieldname string, meta *fieldMetadat
 		if *meta.def == "" {
 			ctx.write("\t\t// Zero value already set.\n")
 		} else {
-			ctx.write("\t\tfield_%s = %s\n", fieldname, *meta.def)
+			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
 		}
 	} else {
 		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
 	}
 	ctx.write("\t}\n")
-
-	ctx.write("\tret.%s = field_%s\n", fieldname, fieldname)
 }
 
 // validateBool writes validator code for a bool.
@@ -61,18 +63,25 @@ func validateBool(ctx *generationContext, fieldname string, meta *fieldMetadata)
 	ctx.addVariable("err", "error")
 
 	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", fieldname, fieldname)
-	ctx.write("\tif !ok {\n")
-	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
-	ctx.write("\t}\n")
 
-	ctx.write("\tret.%s, err = strconv.ParseBool(field_%s_s)\n", fieldname, fieldname)
-	ctx.write("\tif err != nil {\n")
-	ctx.write("\t\treturn nil, err\n")
+	ctx.write("\tif ok {\n")
+	ctx.write("\t\tret.%s, err = strconv.ParseBool(field_%s_s)\n", fieldname, fieldname)
+	ctx.write("\t\tif err != nil {\n")
+	ctx.write("\t\t\treturn nil, err\n")
+	ctx.write("\t\t}\n")
+	ctx.write("\t} else {\n")
+	if meta.def != nil {
+		ctx.write("\t\t// %s is optional.\n", fieldname)
+		if *meta.def == "" {
+			ctx.write("\t\t// Zero value already set.\n")
+		} else {
+			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
+		}
+	} else {
+		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	}
 	ctx.write("\t}\n")
 }
-
-// It would be nice if we didn't have as much duplication of generated
-// code between the numeric validators.
 
 // validateUint writes validator code for a uint of the given bitSize.
 func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata, bitSize int) {
@@ -84,34 +93,46 @@ func validateUint(ctx *generationContext, fieldname string, meta *fieldMetadata,
 	ctx.addVariable("err", "error")
 
 	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", fieldname, fieldname)
-	ctx.write("\tif !ok {\n")
-	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
-	ctx.write("\t}\n")
-
-	ctx.write("\tfield_%s, err = strconv.ParseUint(field_%s_s, 0, %d)\n", fieldname, fieldname, bitSize)
-	ctx.write("\tif err != nil {\n")
-	ctx.write("\t\treturn nil, err\n")
-	ctx.write("\t}\n")
+	ctx.write("\tif ok {\n")
+	ctx.write("\t\tfield_%s, err = strconv.ParseUint(field_%s_s, 0, %d)\n", fieldname, fieldname, bitSize)
+	ctx.write("\t\tif err != nil {\n")
+	ctx.write("\t\t\treturn nil, err\n")
+	ctx.write("\t\t}\n")
 
 	if meta.max != "" {
-		ctx.write("\tif field_%s > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
-		ctx.write("\tif field_%s < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif field_%s < %s {\n", fieldname, meta.min)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\t}\n")
 	}
 
 	// Have to cast since ParseUint returns a uint64.
 	if bitSize == 0 {
-		ctx.write("\tret.%s = uint(field_%s)\n", fieldname, fieldname)
+		ctx.write("\t\tret.%s = uint(field_%s)\n", fieldname, fieldname)
 	} else if bitSize != 64 {
-		ctx.write("\tret.%s = uint%d(field_%s)\n", fieldname, bitSize, fieldname)
+		ctx.write("\t\tret.%s = uint%d(field_%s)\n", fieldname, bitSize, fieldname)
 	} else {
-		ctx.write("\tret.%s = field_%s\n", fieldname, fieldname)
+		ctx.write("\t\tret.%s = field_%s\n", fieldname, fieldname)
 	}
+
+	ctx.write("\t} else {\n")
+
+	if meta.def != nil {
+		ctx.write("\t\t// %s is optional.\n", fieldname)
+		if *meta.def == "" {
+			ctx.write("\t\t// Zero value already set.\n")
+		} else {
+			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
+		}
+	} else {
+		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	}
+
+	ctx.write("\t}\n")
 }
 
 // validateInt writes validator code for an int of the given bitSize.
@@ -124,34 +145,46 @@ func validateInt(ctx *generationContext, fieldname string, meta *fieldMetadata, 
 	ctx.addVariable("err", "error")
 
 	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", fieldname, fieldname)
-	ctx.write("\tif !ok {\n")
-	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
-	ctx.write("\t}\n")
-
-	ctx.write("\tfield_%s, err = strconv.ParseInt(field_%s_s, 0, %d)\n", fieldname, fieldname, bitSize)
-	ctx.write("\tif err != nil {\n")
-	ctx.write("\t\treturn nil, err\n")
-	ctx.write("\t}\n")
+	ctx.write("\tif ok {\n")
+	ctx.write("\t\tfield_%s, err = strconv.ParseInt(field_%s_s, 0, %d)\n", fieldname, fieldname, bitSize)
+	ctx.write("\t\tif err != nil {\n")
+	ctx.write("\t\t\treturn nil, err\n")
+	ctx.write("\t\t}\n")
 
 	if meta.max != "" {
-		ctx.write("\tif field_%s> %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
-		ctx.write("\tif field_%s< %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif field_%s < %s {\n", fieldname, meta.min)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\t}\n")
 	}
 
 	// Have to cast since ParseInt returns an int64.
 	if bitSize == 0 {
-		ctx.write("\tret.%s = int(field_%s)\n", fieldname, fieldname)
+		ctx.write("\t\tret.%s = int(field_%s)\n", fieldname, fieldname)
 	} else if bitSize != 64 {
-		ctx.write("\tret.%s = int%d(field_%s)\n", fieldname, bitSize, fieldname)
+		ctx.write("\t\tret.%s = int%d(field_%s)\n", fieldname, bitSize, fieldname)
 	} else {
-		ctx.write("\tret.%s = field_%s\n", fieldname, fieldname)
+		ctx.write("\t\tret.%s = field_%s\n", fieldname, fieldname)
 	}
+
+	ctx.write("\t} else {\n")
+
+	if meta.def != nil {
+		ctx.write("\t\t// %s is optional.\n", fieldname)
+		if *meta.def == "" {
+			ctx.write("\t\t// Zero value already set.\n")
+		} else {
+			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
+		}
+	} else {
+		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	}
+
+	ctx.write("\t}\n")
 }
 
 // validateFloat writes validator code for a float of the given bitSize.
@@ -164,29 +197,44 @@ func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata
 	ctx.addVariable("err", "error")
 
 	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", fieldname, fieldname)
-	ctx.write("\tif !ok {\n")
-	ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
-	ctx.write("\t}\n")
-
-	ctx.write("\tfield_%s, err = strconv.ParseFloat(field_%s_s, %d)\n", fieldname, fieldname, bitSize)
-	ctx.write("\tif err != nil {\n")
-	ctx.write("\t\treturn nil, err\n")
-	ctx.write("\t}\n")
+	ctx.write("\tif ok {\n")
+	ctx.write("\t\tfield_%s, err = strconv.ParseFloat(field_%s_s, 0, %d)\n", fieldname, fieldname, bitSize)
+	ctx.write("\t\tif err != nil {\n")
+	ctx.write("\t\t\treturn nil, err\n")
+	ctx.write("\t\t}\n")
 
 	if meta.max != "" {
-		ctx.write("\tif field_%s > %s {\n", fieldname, meta.max)
-		ctx.write("\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif field_%s > %s{\n", fieldname, meta.max)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s can be at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
-		ctx.write("\tif field_%s < %s {\n", fieldname, meta.min)
-		ctx.write("\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
-		ctx.write("\t}\n")
+		ctx.write("\t\tif field_%s < %s {\n", fieldname, meta.min)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s must be at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\t}\n")
 	}
 
-	// Have to cast since ParseFloat returns a float64.  Superfluous
-	// if bitSize is 64, but whatever.
-	ctx.write("\tret.%s = float%d(field_%s)\n", fieldname, bitSize, fieldname)
+	// Have to cast since ParseFloat returns a float64.
+	if bitSize == 32 {
+		ctx.write("\t\tret.%s = float32(field_%s)\n", fieldname, fieldname)
+	} else { // 64
+		ctx.write("\t\tret.%s = field_%s\n", fieldname, fieldname)
+	}
+
+	ctx.write("\t} else {\n")
+
+	if meta.def != nil {
+		ctx.write("\t\t// %s is optional.\n", fieldname)
+		if *meta.def == "" {
+			ctx.write("\t\t// Zero value already set.\n")
+		} else {
+			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
+		}
+	} else {
+		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	}
+
+	ctx.write("\t}\n")
 }
 
 // validateSimpleType delegates validator code generation given the name
