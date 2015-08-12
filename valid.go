@@ -196,7 +196,7 @@ func validateFloat(ctx *generationContext, fieldname string, meta *fieldMetadata
 
 	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", fieldname, fieldname)
 	ctx.write("\tif ok {\n")
-	ctx.write("\t\tfield_%s, err = strconv.ParseFloat(field_%s_s, 0, %d)\n", fieldname, fieldname, bitSize)
+	ctx.write("\t\tfield_%s, err = strconv.ParseFloat(field_%s_s, %d)\n", fieldname, fieldname, bitSize)
 	ctx.write("\t\tif err != nil {\n")
 	ctx.write("\t\t\treturn nil, err\n")
 	ctx.write("\t\t}\n")
