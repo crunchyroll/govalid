@@ -21,26 +21,24 @@ func validateString(ctx *generationContext, fieldname string, meta *fieldMetadat
 	ctx.addVariable("ok", "bool")
 
 	ctx.write("\tfield_%s, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif ok {\n")
 
-	if meta.max != "" || meta.min != "" {
-		ctx.write("\tif ok {\n")
-		if meta.max != "" {
-			ctx.addImport("errors")
-			ctx.write("\t\tif len(field_%s) > %s {\n", fieldname, meta.max)
-			ctx.write("\t\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
-			ctx.write("\t\t}\n")
-		}
-		if meta.min != "" {
-			ctx.addImport("errors")
-			ctx.write("\t\tif len(field_%s) < %s {\n", fieldname, meta.min)
-			ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
-			ctx.write("\t\t}\n")
-		}
-		ctx.write("\t\tret.%s = field_%s\n", fieldname, fieldname)
-		ctx.write("\t} else {\n")
-	} else {
-		ctx.write("\tif !ok {\n")
+	if meta.max != "" {
+		ctx.addImport("errors")
+		ctx.write("\t\tif len(field_%s) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\t}\n")
 	}
+	if meta.min != "" {
+		ctx.addImport("errors")
+		ctx.write("\t\tif len(field_%s) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\t}\n")
+	}
+
+	ctx.write("\t\tret.%s = field_%s\n", fieldname, fieldname)
+	ctx.write("\t} else {\n")
+
 	if meta.def != nil {
 		ctx.write("\t\t// %s is optional.\n", fieldname)
 		if *meta.def == "" {
