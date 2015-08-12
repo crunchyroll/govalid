@@ -26,7 +26,7 @@ Future Work
 
 Bugs
 ----
- - Users cannot add more types to validate as they develop without
-   modifying this library.
+ - Users cannot add more types to validate without modifying this
+   library.
 
 [1]: https://en.wikipedia.org/wiki/Fuzz_testing
