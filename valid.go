@@ -12,8 +12,8 @@ import (
 	"unicode/utf8"
 )
 
-// It would be nice if we didn't have as much duplication of generated
-// code between the validators.
+// XXX There is too much duplication of generated code among the
+// validators.
 
 // validateString writes validator code for a string.
 func validateString(ctx *generationContext, fieldname string, meta *fieldMetadata) {
