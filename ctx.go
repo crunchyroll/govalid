@@ -46,7 +46,7 @@ func (ctx *generationContext) addVariable(name, typeexpr string) {
 
 func (ctx *generationContext) getImports() []string {
 	r := make([]string, 0, 10)
-	for name, _ := range ctx.imports {
+	for name := range ctx.imports {
 		r = append(r, name)
 	}
 	return r
