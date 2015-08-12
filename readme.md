@@ -13,7 +13,6 @@ Run `go test` to test.  You may want to run `go test -short` to avoid
 
 Future Work
 -----------
- - Document def, max, min.
  - Document that the generation of bad code no longer happens.
  - Nicer error reporting.  Ideally, the validation library would give
    you an error object from which you could easily generate a
