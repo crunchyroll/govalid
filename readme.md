@@ -13,10 +13,7 @@ Run `go test` to test.  You may want to run `go test -short` to avoid
 
 Future Work
 -----------
- - Add more types to validate:
-    - Bounded strings
-    - Bounded numbers
- - Optional fields.
+ - Real functional testing.
  - Nicer error reporting.  Ideally, the validation library would give
    you an error object from which you could easily generate a
    human-readable string indicating all of the bad fields passed in and
@@ -26,7 +23,10 @@ Future Work
  - Include comments from original source.
  - Handle weirder pre-existing imports source files, such as strconv
    imported as some other name.
- - Don't generate bad code if there are no validatable fields?
-   Currently generates an unused `var err error`.
+
+Bugs
+----
+ - Users cannot add more types to validate without modifying this
+   library.
 
 [1]: https://en.wikipedia.org/wiki/Fuzz_testing

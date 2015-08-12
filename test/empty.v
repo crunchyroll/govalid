@@ -1,7 +1,7 @@
 package badpkg
 
 type foo struct {
-	x int
+	x struct{}
 }
 
 type badTypeSet struct {

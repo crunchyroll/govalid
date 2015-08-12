@@ -46,7 +46,7 @@ func prependImport(astfile *ast.File, name string) {
 	// just inserted into the AST as you'd think.  So in order for
 	// the generated code to be idempotent under gofmt, we have to
 	// insert a newline here at the beginning.
-	commentText := fmt.Sprintf("\n// *** %s IMPORT ADDED BY %s ***", name, args.progUpper)
+	commentText := fmt.Sprintf("\n// *** IMPORT ADDED BY %s ***", args.progUpper)
 	comment := &ast.CommentGroup{
 		List: []*ast.Comment{
 			&ast.Comment{

@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 
@@ -26,13 +25,12 @@ func process(dst io.Writer, srcname string, src io.Reader) error {
 		return err
 	}
 
-	// Buffer validator function code before outputting anything.
-	// We do this because we need to know whether we need to augment
-	// the import list before outputting any declarations (imports
-	// must precede declarations).
-	buf := new(bytes.Buffer)
-
-	needsStrconv := false
+	// We buffer the validator function code in a context's buffer
+	// before outputting anything.  We do this because we need to
+	// know whether we need to augment the import list before
+	// outputting any declarations (imports must precede
+	// declarations).
+	ctx := newContext()
 
 	// Isolate the struct types--the things for which we want to
 	// generate validator functions.
@@ -54,16 +52,15 @@ func process(dst io.Writer, srcname string, src io.Reader) error {
 
 		// Ok, we isolated the struct type, now output a
 		// validator for it.
-		if validator(buf, ts.Name.Name, s) {
-			needsStrconv = true
-		}
+		validator(ctx, ts.Name.Name, s)
 	}
 
-	// Add strconv import if needed.  Also, make more generic if
-	// need be.  (E.g., adding other imports besides strconv, doing
-	// non-linear search through existing imports, etc.)
-	if needsStrconv && !hasImport(astfile, "strconv") {
-		prependImport(astfile, "strconv")
+	// Add imports if needed.
+	for _, importName := range ctx.getImports() {
+		if hasImport(astfile, importName) {
+			continue
+		}
+		prependImport(astfile, importName)
 	}
 
 	// Output header comment.
@@ -80,8 +77,8 @@ func process(dst io.Writer, srcname string, src io.Reader) error {
 		return err
 	}
 
-	// Output generated code (from the buffer).
-	io.Copy(dst, buf)
+	// Output generated code from the buffer.
+	io.Copy(dst, ctx.Buffer)
 
 	return nil
 }
