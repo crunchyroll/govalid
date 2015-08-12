@@ -12,10 +12,26 @@ pointer_type = "*" ( simple_type | pkg_type ) .
 type = simple_type | pointer_type .
 
 letter = "a" … "z" | "A" … "Z" .
-// Make names at least three letters long to avoid:
+// Make names at least five letters long to avoid:
 //  - One-character names, which increase the chance of collisions.
-//  - Accidentally generating reserved words, such as "if".
-name = letter letter letter { letter } .
+//  - Accidentally generating reserved words, such as "if" or "goto".
+name = letter letter letter letter letter { letter } .
+
+tag_json_field = "" | name | "omitempty" .
+tag_json = `json:"` tag_json_field { "," tag_json_field } `"` .
+
+pos = "1" … "9" .
+digit = "0" | pos .
+number = pos { digit } .
+
+tag_valid_def = "def" [ ":" name ] .
+tag_valid_min = "min:" number .
+tag_valid_max = "max:" number .
+tag_valid     = `valid:"` ( tag_valid_max | tag_valid_def |
+  tag_valid_min ) `"`.
+
+tag = "`" ( ( tag_json [ "," tag_valid ] ) |
+  ( tag_valid [ "," tag_json ] )  ) "`" .
 
 field_name = name .
 struct_name = name .
@@ -29,8 +45,8 @@ tab_comment = "\t" comment .
 comments = [ comment ] [ comment ].
 tab_comments = [ tab_comment ] [ tab_comment ] .
 
-field = "\t" field_name " " type newlines .
-field_full = [ tab_comments ] field .
+field = "\t" field_name " " type .
+field_full = [ tab_comments ] field [ " " tag ] newlines .
 struct = "type " struct_name " struct {" newlines
   field_full { field_full } "}" newlines .
 
