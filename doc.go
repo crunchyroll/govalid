@@ -222,8 +222,8 @@
 //	*mail.Address
 //	*url.URL
 //
-// Note that you will be responsible for importing net/mail or net/url
-// in your .v file yourself.
+// You are responsible for importing net/mail or net/url in your .v file
+// yourself if using a mail address or URL.
 //
 // Integer Bases
 //
