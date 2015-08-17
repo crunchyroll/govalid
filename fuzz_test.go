@@ -12,7 +12,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 
-	"chrispennello.com/go/rebnf"
+	"github.com/crunchyroll/rebnf"
 
 	"golang.org/x/exp/ebnf"
 )
