@@ -27,13 +27,13 @@ func getReqInput(req *http.Request) (map[string]string, error) {
 	return r, nil
 }
 
-func hashPass(password string) ([]byte, error) {
-	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func hashPass(password []byte) ([]byte, error) {
+	return bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 }
 
 type userInput struct {
 	username string `valid:"max:16"`
-	password string `valid:"max:64"`
+	password []byte `valid:"max:128"`
 
 	fname string `valid:"max:128,def"`
 	lname string `valid:"max:128,def"`
@@ -58,15 +58,16 @@ type groupInput struct {
 func validateUserInput(data map[string]string) (*userInput, error) {
 	ret := new(userInput)
 	var (
-		field_username string
-		field_email_s  string
-		err            error
-		ok             bool
-		field_password string
-		field_fname    string
-		field_lname    string
-		field_age_s    string
-		field_age      uint64
+		field_age_s       string
+		field_age         uint64
+		ok                bool
+		field_password_s  string
+		field_lname       string
+		field_fname       string
+		field_email_s     string
+		field_username    string
+		field_password_sl []byte
+		err               error
 	)
 
 	// username string
@@ -80,13 +81,14 @@ func validateUserInput(data map[string]string) (*userInput, error) {
 		return nil, errors.New("username is required")
 	}
 
-	// password string
-	field_password, ok = data["password"]
+	// password []byte
+	field_password_s, ok = data["password"]
 	if ok {
-		if len(field_password) > 64 {
-			return nil, errors.New("password can have a length of at most 64")
+		field_password_sl = []byte(field_password_s)
+		if len(field_password_sl) > 128 {
+			return nil, errors.New("password can have a length of at most 128")
 		}
-		ret.password = field_password
+		ret.password = field_password_sl
 	} else {
 		return nil, errors.New("password is required")
 	}
@@ -118,7 +120,7 @@ func validateUserInput(data map[string]string) (*userInput, error) {
 	// email *mail.Address
 	field_email_s, ok = data["email"]
 	if ok {
-		if len(data["email"]) > 1024 {
+		if len(field_email_s) > 1024 {
 			return nil, errors.New("email can have a length of at most 1024")
 		}
 		ret.email, err = mail.ParseAddress(field_email_s)
@@ -161,9 +163,9 @@ func validateUserInput(data map[string]string) (*userInput, error) {
 func validateGroupInput(data map[string]string) (*groupInput, error) {
 	ret := new(groupInput)
 	var (
+		field_descr string
 		field_name  string
 		ok          bool
-		field_descr string
 	)
 
 	// name string

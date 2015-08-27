@@ -21,13 +21,13 @@ func getReqInput(req *http.Request) (map[string]string, error) {
 	return r, nil
 }
 
-func hashPass(password string) ([]byte, error) {
-	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func hashPass(password []byte) ([]byte, error) {
+	return bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 }
 
 type userInput struct {
 	username string `valid:"max:16"`
-	password string `valid:"max:64"`
+	password []byte `valid:"max:128"`
 
 	fname string `valid:"max:128,def"`
 	lname string `valid:"max:128,def"`

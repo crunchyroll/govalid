@@ -33,15 +33,13 @@ func handleUser(w http.ResponseWriter, req *http.Request) {
 		handleError(w, 500, err2)
 		return
 	}
-	password, err3 := hashPass(ui.password)
-	if err3 != nil {
-		handleError(w, 500, err3)
+	ui.password, err2 = hashPass(ui.password)
+	if err2 != nil {
+		handleError(w, 500, err2)
 		return
 	}
 	io.WriteString(w, "ok")
-	ui.password = ""
-	log.Println("user input", ui)
-	log.Println("bcrypt'd user password", string(password))
+	log.Println("user input, password hashed", ui)
 }
 
 func handleGroup(w http.ResponseWriter, req *http.Request) {
