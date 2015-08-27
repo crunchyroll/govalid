@@ -301,13 +301,13 @@ func validateMailAddress(ctx *generationContext, fieldname string, meta *fieldMe
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\t\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\tif len(field_%s_s) > %s {\n", fieldname, meta.max)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
-		ctx.write("\t\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\tif len(field_%s_s) < %s {\n", fieldname, meta.min)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t\t}\n")
 	}
@@ -344,13 +344,13 @@ func validateUrl(ctx *generationContext, fieldname string, meta *fieldMetadata) 
 
 	if meta.max != "" {
 		ctx.addImport("errors")
-		ctx.write("\t\tif len(data[\"%s\"]) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\tif len(field_%s_s) > %s {\n", fieldname, meta.max)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
 		ctx.write("\t\t}\n")
 	}
 	if meta.min != "" {
 		ctx.addImport("errors")
-		ctx.write("\t\tif len(data[\"%s\"]) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\tif len(field_%s_s) < %s {\n", fieldname, meta.min)
 		ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
 		ctx.write("\t\t}\n")
 	}
