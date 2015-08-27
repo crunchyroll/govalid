@@ -13,8 +13,6 @@ Run `go test` to test.  You may want to run `go test -short` to avoid
 
 Future Work
 -----------
- - Add more types to validate:
-    - `[]byte`
  - Real functional testing.
  - Nicer error reporting.  Ideally, the validation library would give
    you an error object from which you could easily generate a
