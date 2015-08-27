@@ -9,7 +9,8 @@ simple_type = string_type | bool_type | float_type | int_type |
   complex_type | byte_type | rune_type .
 pkg_type = "mail.Address" | "url.URL" | "bytes.Buffer" .
 pointer_type = "*" ( simple_type | pkg_type ) .
-type = simple_type | pointer_type .
+slice_type = "[]" simple_type .
+type = simple_type | pointer_type | slice_type .
 
 letter = "a" … "z" | "A" … "Z" .
 // Make names at least five letters long to avoid:

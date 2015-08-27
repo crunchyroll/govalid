@@ -376,6 +376,53 @@ func validateUrl(ctx *generationContext, fieldname string, meta *fieldMetadata) 
 	ctx.write("\t}\n")
 }
 
+// validateSimpleSlice writes validator code for slices of simple types.
+// It currently supports only slices of bytes.
+func validateSimpleSlice(ctx *generationContext, fieldname, typename string, meta *fieldMetadata) {
+	if typename != "byte" {
+		return
+	}
+
+	ctx.addVariable(fmt.Sprintf("field_%s_s", fieldname), "string")
+	ctx.addVariable(fmt.Sprintf("field_%s_sl", fieldname), "[]byte")
+	ctx.addVariable("ok", "bool")
+	ctx.addVariable("err", "error")
+
+	ctx.write("\tfield_%s_s, ok = data[\"%s\"]\n", fieldname, fieldname)
+	ctx.write("\tif ok {\n")
+	ctx.write("\t\tfield_%s_sl = []byte(field_%s_s)\n", fieldname, fieldname)
+
+	if meta.max != "" {
+		ctx.addImport("errors")
+		ctx.write("\t\tif len(field_%s_sl) > %s {\n", fieldname, meta.max)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s can have a length of at most %s\")\n", fieldname, meta.max)
+		ctx.write("\t\t}\n")
+	}
+	if meta.min != "" {
+		ctx.addImport("errors")
+		ctx.write("\t\tif len(field_%s_sl) < %s {\n", fieldname, meta.min)
+		ctx.write("\t\t\treturn nil, errors.New(\"%s must have a length of at least %s\")\n", fieldname, meta.min)
+		ctx.write("\t\t}\n")
+	}
+
+	ctx.write("\t\tret.%s = field_%s_sl\n", fieldname, fieldname)
+	ctx.write("\t} else {\n")
+
+	if meta.def != nil {
+		ctx.write("\t\t// %s is optional.\n", fieldname)
+		if *meta.def == "" {
+			ctx.write("\t\t// Zero value already set.\n")
+		} else {
+			ctx.write("\t\tret.%s = %s\n", fieldname, *meta.def)
+		}
+	} else {
+		ctx.addImport("errors")
+		ctx.write("\t\treturn nil, errors.New(\"%s is required\")\n", fieldname)
+	}
+
+	ctx.write("\t}\n")
+}
+
 func makeFunctionName(structname string) string {
 	first, _ := utf8.DecodeRune([]byte(structname))
 	isPublic := unicode.IsUpper(first)
@@ -425,6 +472,23 @@ func validatorImpl(ctx *generationContext, structtype *ast.StructType) {
 			} else if pkgname == "url" && typename == "URL" {
 				validateUrl(ctx, fieldname, meta)
 			}
+
+		// We'll look for a "simple" slice type.
+		case *ast.ArrayType:
+			array := field.Type.(*ast.ArrayType)
+			if array.Len != nil {
+				// This is actually an _array_ type, not
+				// a slice type.
+				continue
+			}
+			ident, ok := array.Elt.(*ast.Ident)
+			if !ok {
+				// We're interested only in "simple" slices.
+				continue
+			}
+			typename := ident.Name
+			ctx.write("\n\t// %s []%s\n", fieldname, typename)
+			validateSimpleSlice(ctx, fieldname, typename, meta)
 		}
 	}
 }
